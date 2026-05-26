@@ -1,3 +1,4 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import {
     Image,
@@ -59,13 +60,19 @@ export default function WelcomeScreen() {
             resizeMode="contain"
           />
         </View>
-
         <Link href="/home" asChild>
-          <Pressable style={styles.primaryButton}>
+        <Pressable>
+            <LinearGradient
+            colors={["#2563EB", "#1D4ED8"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.primaryButton}
+            >
             <Text style={styles.primaryButtonText}>
-              + Nuevo presupuesto
+                + Nuevo presupuesto
             </Text>
-          </Pressable>
+            </LinearGradient>
+        </Pressable>
         </Link>
 
         <View style={styles.featuresCard}>
@@ -124,23 +131,24 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 400,
-    height: 140,
+    width: 220,
+    height: 64,
     alignSelf: "center",
-  },
+    marginTop: 24,
+    },
 
   hero: {
-    marginTop: 28,
+    marginTop: 36,
     position: "relative",
-    minHeight: 360,
+    minHeight: 300,
   },
 
   title: {
-    fontSize: 34,
-    lineHeight: 44,
+    fontSize: 26,
+    lineHeight: 34,
     fontWeight: "900",
     color: "#0F172A",
-    letterSpacing: -0.8,
+    letterSpacing: -0.5,
     maxWidth: "72%",
   },
 
@@ -149,38 +157,37 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    marginTop: 22,
-    fontSize: 18,
-    lineHeight: 28,
+    marginTop: 18,
+    fontSize: 16,
+    lineHeight: 24,
     color: "#475569",
     fontWeight: "500",
     maxWidth: "68%",
   },
 
   heroIcon: {
-    width: 170,
-    height: 170,
+    width: 135,
+    height: 135,
     position: "absolute",
-    right: -8,
-    top: 96,
-    opacity: 0.09,
+    right: 0,
+    top: 70,
+    opacity: 0.08,
   },
 
-  primaryButton: {
-    height: 62,
-    borderRadius: 18,
-    backgroundColor: "#2563EB",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#2563EB",
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    elevation: 8,
+primaryButton: {
+  height: 62,
+  borderRadius: 18,
+  alignItems: "center",
+  justifyContent: "center",
+  shadowColor: "#2563EB",
+  shadowOpacity: 0.22,
+  shadowRadius: 14,
+  shadowOffset: {
+    width: 0,
+    height: 8,
   },
+  elevation: 8,
+},
 
   primaryButtonText: {
     color: "#FFFFFF",
