@@ -7,7 +7,14 @@ export type QuoteMetaForm = {
   notes: string;
 };
 
+export type QuoteItemForm = {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+};
+
 export type QuoteMetaErrors = Partial<Record<keyof QuoteMetaForm, string>>;
+export type QuoteItemErrors = Partial<Record<keyof QuoteItemForm, string>>;
 
 export function validateQuoteMeta(values: QuoteMetaForm): QuoteMetaErrors {
   const errors: QuoteMetaErrors = {};
@@ -30,6 +37,24 @@ export function validateQuoteMeta(values: QuoteMetaForm): QuoteMetaErrors {
     values.depositPercentage > 100
   ) {
     errors.depositPercentage = "Ingresa un porcentaje entre 0 y 100";
+  }
+
+  return errors;
+}
+
+export function validateQuoteItem(values: QuoteItemForm): QuoteItemErrors {
+  const errors: QuoteItemErrors = {};
+
+  if (!values.description.trim()) {
+    errors.description = "Ingresa una descripcion";
+  }
+
+  if (!Number.isFinite(values.quantity) || values.quantity < 1) {
+    errors.quantity = "Ingresa una cantidad valida";
+  }
+
+  if (!Number.isFinite(values.unitPrice) || values.unitPrice <= 0) {
+    errors.unitPrice = "Ingresa un precio valido";
   }
 
   return errors;
