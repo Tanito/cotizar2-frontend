@@ -1,32 +1,34 @@
-import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import {
-    Image,
-    Pressable,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Image,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 const FEATURES = [
   {
-    title: "Sin registro",
-    description: "Usalo gratis sin crear cuenta",
-    icon: "👤",
-  },
-  {
-    title: "Rápido y simple",
-    description: "Creá y enviá en segundos",
     icon: "⚡",
+    iconBg: "#FEF3C7",
+    title: "Sin registro",
+    description: "Entras y cotizas. Sin crear cuenta.",
   },
   {
-    title: "Por WhatsApp",
-    description: "Compartí al instante",
-    icon: "💬",
+    icon: "📄",
+    iconBg: "#DBEAFE",
+    title: "PDF profesional",
+    description: "Presupuesto limpio y listo para enviar.",
   },
-];
+  {
+    icon: "💬",
+    iconBg: "#DCFCE7",
+    title: "WhatsApp",
+    description: "Compartilo con un toque.",
+  },
+] as const;
 
 export default function WelcomeScreen() {
   return (
@@ -35,84 +37,82 @@ export default function WelcomeScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <Image
-          source={require("../assets/images/logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-
-        <View style={styles.hero}>
-          <Text style={styles.title}>
-            Cotizá y enviá{"\n"}
-            presupuestos{"\n"}
-            profesionales{"\n"}
-            <Text style={styles.highlight}>en minutos</Text>
-          </Text>
-
-          <Text style={styles.subtitle}>
-            Simple, rápido y gratis.{"\n"}
-            Ideal para WhatsApp.
-          </Text>
-
+        <View style={styles.content}>
           <Image
-            source={require("../assets/images/icon.png")}
-            style={styles.heroIcon}
+            source={require("../assets/images/logo.png")}
+            style={styles.logo}
             resizeMode="contain"
           />
-        </View>
-        <Link href="/home" asChild>
-        <Pressable>
-            <LinearGradient
-            colors={["#2563EB", "#1D4ED8"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.primaryButton}
-            >
-            <Text style={styles.primaryButtonText}>
-                + Nuevo presupuesto
-            </Text>
-            </LinearGradient>
-        </Pressable>
-        </Link>
 
-        <View style={styles.featuresCard}>
-          {FEATURES.map((feature, index) => (
-            <View key={feature.title}>
-              <View style={styles.featureRow}>
-                <View style={styles.iconBubble}>
+          <Text style={styles.tagline}>
+            Presupuestos profesionales para tecnicos y oficios.{"\n"}Sin
+            registro.
+          </Text>
+
+          <View style={styles.heroCard}>
+            <View style={styles.heroBadge}>
+              <Text style={styles.heroBadgeText}>FREE • SIN CUENTA</Text>
+            </View>
+
+            <Text style={styles.heroTitle}>
+              Crea tu{"\n"}
+              presupuesto{"\n"}
+              en minutos
+            </Text>
+
+            <Text style={styles.heroDescription}>
+              Arma un PDF profesional y compartilo directo por WhatsApp.
+            </Text>
+
+            <Link href="/home" asChild>
+              <Pressable style={styles.heroButton}>
+                <Text style={styles.heroButtonText}>+ Nuevo presupuesto</Text>
+              </Pressable>
+            </Link>
+          </View>
+
+          <Text style={styles.sectionTitle}>¿Que podes hacer gratis?</Text>
+
+          <View style={styles.featuresList}>
+            {FEATURES.map((feature) => (
+              <View key={feature.title} style={styles.featureCard}>
+                <View
+                  style={[styles.featureIconWrap, { backgroundColor: feature.iconBg }]}
+                >
                   <Text style={styles.featureIcon}>{feature.icon}</Text>
                 </View>
 
-                <View style={styles.featureText}>
-                  <Text style={styles.featureTitle}>{feature.title}</Text>
-                  <Text style={styles.featureDescription}>
-                    {feature.description}
-                  </Text>
-                </View>
+                <Text style={styles.featureTitle}>{feature.title}</Text>
+                <Text style={styles.featureDescription}>
+                  {feature.description}
+                </Text>
               </View>
+            ))}
+          </View>
 
-              {index < FEATURES.length - 1 && (
-                <View style={styles.separator} />
-              )}
+          <View style={styles.premiumCard}>
+            <View style={styles.premiumBadge}>
+              <Text style={styles.premiumBadgeText}>PREMIUM</Text>
             </View>
-          ))}
+
+            <Text style={styles.premiumTitle}>Guarda todo</Text>
+
+            <Text style={styles.premiumDescription}>
+              Clientes, historial, catalogo de precios, branding y mas.
+            </Text>
+
+            <Link href="/register" asChild>
+              <Pressable style={styles.premiumButton}>
+                <Text style={styles.premiumButtonText}>Ver Premium</Text>
+              </Pressable>
+            </Link>
+          </View>
+
+          <Text style={styles.footer}>
+            Tenes ideas?{" "}
+            <Text style={styles.footerLink}>Mandanos feedback</Text>
+          </Text>
         </View>
-
-        <Link href="/login" asChild>
-          <Pressable style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>
-              Iniciar sesión
-            </Text>
-          </Pressable>
-        </Link>
-
-        <Link href="/register" asChild>
-          <Pressable style={styles.linkButton}>
-            <Text style={styles.linkText}>
-              Crear cuenta Premium
-            </Text>
-          </Pressable>
-        </Link>
       </ScrollView>
     </SafeAreaView>
   );
@@ -125,162 +125,215 @@ const styles = StyleSheet.create({
   },
 
   scroll: {
-    paddingHorizontal: 28,
-    paddingTop: 18,
-    paddingBottom: 36,
+    flexGrow: 1,
+  },
+
+  content: {
+    minHeight: "100%",
+    borderRadius: 44,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 24,
+    paddingVertical: 32,
   },
 
   logo: {
-    width: 220,
-    height: 64,
+    width: 468,
+    height: 278,
     alignSelf: "center",
-    marginTop: 24,
-    },
-
-  hero: {
-    marginTop: 36,
-    position: "relative",
-    minHeight: 300,
   },
 
-  title: {
+  tagline: {
+    marginTop: 6,
     fontSize: 26,
-    lineHeight: 34,
-    fontWeight: "900",
-    color: "#0F172A",
-    letterSpacing: -0.5,
-    maxWidth: "72%",
+    lineHeight: 38,
+    color: "#475569",
   },
 
-  highlight: {
+  heroCard: {
+    marginTop: 32,
+    borderRadius: 34,
+    paddingHorizontal: 28,
+    paddingVertical: 28,
+    backgroundColor: "#2563EB",
+    shadowColor: "#2563EB",
+    shadowOpacity: 0.35,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 14 },
+    elevation: 8,
+  },
+
+  heroBadge: {
+    alignSelf: "flex-start",
+    borderRadius: 999,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+
+  heroBadgeText: {
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    color: "#FFFFFF",
+  },
+
+  heroTitle: {
+    marginTop: 20,
+    fontSize: 44,
+    lineHeight: 52,
+    fontWeight: "800",
+    color: "#FFFFFF",
+  },
+
+  heroDescription: {
+    marginTop: 20,
+    fontSize: 24,
+    lineHeight: 34,
+    color: "#FFFFFF",
+  },
+
+  heroButton: {
+    marginTop: 28,
+    height: 64,
+    borderRadius: 22,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  heroButtonText: {
+    fontSize: 24,
+    fontWeight: "800",
     color: "#2563EB",
   },
 
-  subtitle: {
-    marginTop: 18,
-    fontSize: 16,
-    lineHeight: 24,
-    color: "#475569",
-    fontWeight: "500",
-    maxWidth: "68%",
-  },
-
-  heroIcon: {
-    width: 135,
-    height: 135,
-    position: "absolute",
-    right: 0,
-    top: 70,
-    opacity: 0.08,
-  },
-
-primaryButton: {
-  height: 62,
-  borderRadius: 18,
-  alignItems: "center",
-  justifyContent: "center",
-  shadowColor: "#2563EB",
-  shadowOpacity: 0.22,
-  shadowRadius: 14,
-  shadowOffset: {
-    width: 0,
-    height: 8,
-  },
-  elevation: 8,
-},
-
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 20,
+  sectionTitle: {
+    marginTop: 32,
+    marginBottom: 20,
+    fontSize: 54,
+    lineHeight: 58,
     fontWeight: "800",
+    color: "#0F172A",
   },
 
-  featuresCard: {
-    marginTop: 28,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+  featuresList: {
+    gap: 16,
+  },
+
+  featureCard: {
+    borderRadius: 28,
     borderWidth: 1,
-    borderColor: "#EEF2F7",
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-    elevation: 4,
+    borderColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    shadowColor: "#000000",
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
-  featureRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-  },
-
-  iconBubble: {
-    width: 52,
-    height: 52,
-    borderRadius: 18,
-    backgroundColor: "#EFF6FF",
+  featureIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 16,
+    marginBottom: 20,
   },
 
   featureIcon: {
-    fontSize: 22,
-  },
-
-  featureText: {
-    flex: 1,
+    fontSize: 30,
   },
 
   featureTitle: {
-    fontSize: 20,
+    fontSize: 50,
+    lineHeight: 56,
     fontWeight: "800",
     color: "#0F172A",
   },
 
   featureDescription: {
-    marginTop: 4,
-    fontSize: 16,
+    marginTop: 8,
+    fontSize: 21,
+    lineHeight: 31,
     color: "#64748B",
-    lineHeight: 22,
   },
 
-  separator: {
-    height: 1,
-    backgroundColor: "#EEF2F7",
-    marginLeft: 68,
+  premiumCard: {
+    marginTop: 32,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    shadowColor: "#000000",
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
-  secondaryButton: {
-    marginTop: 28,
-    height: 58,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: "#DCE7F8",
+  premiumBadge: {
+    alignSelf: "flex-start",
+    borderRadius: 999,
+    backgroundColor: "#EFF6FF",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+
+  premiumBadgeText: {
+    fontSize: 13,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+    color: "#2563EB",
+  },
+
+  premiumTitle: {
+    marginTop: 20,
+    fontSize: 60,
+    lineHeight: 64,
+    fontWeight: "800",
+    color: "#0F172A",
+  },
+
+  premiumDescription: {
+    marginTop: 12,
+    fontSize: 22,
+    lineHeight: 33,
+    color: "#64748B",
+  },
+
+  premiumButton: {
+    marginTop: 24,
+    height: 64,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: "#2563EB",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
 
-  secondaryButtonText: {
+  premiumButtonText: {
+    fontSize: 23,
+    fontWeight: "800",
+    color: "#2563EB",
+  },
+
+  footer: {
+    paddingTop: 32,
+    paddingBottom: 16,
+    textAlign: "center",
     fontSize: 18,
-    fontWeight: "700",
-    color: "#0F172A",
+    lineHeight: 28,
+    color: "#64748B",
   },
 
-  linkButton: {
-    marginTop: 18,
-    alignItems: "center",
-  },
-
-  linkText: {
-    fontSize: 17,
-    fontWeight: "700",
+  footerLink: {
+    fontWeight: "800",
     color: "#2563EB",
   },
 });
