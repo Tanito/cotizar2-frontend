@@ -10,6 +10,12 @@ export type FreeQuote = QuoteMetaForm & {
   items: QuoteItem[];
 };
 
+type StoreState = {
+  quote: FreeQuote;
+  pdfUrl: string | null;
+  whatsappText: string | null;
+};
+
 const defaultQuote: FreeQuote = {
   customerName: "",
   customerPhone: "",
@@ -20,7 +26,12 @@ const defaultQuote: FreeQuote = {
   items: [],
 };
 
-let quote: FreeQuote = { ...defaultQuote };
+let state: StoreState = {
+  quote: { ...defaultQuote },
+  pdfUrl: null,
+  whatsappText: null,
+};
+
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -33,7 +44,7 @@ function subscribe(listener: () => void) {
 }
 
 function getSnapshot() {
-  return quote;
+  return state;
 }
 
 function createItemId() {
@@ -41,55 +52,77 @@ function createItemId() {
 }
 
 export const freeQuoteStore = {
-  getQuote: getSnapshot,
+  getState: getSnapshot,
   setQuoteMeta(meta: QuoteMetaForm) {
-    quote = { ...quote, ...meta };
+    state = { ...state, quote: { ...state.quote, ...meta } };
     emit();
   },
   addItem(item: QuoteItemForm) {
-    quote = {
-      ...quote,
-      items: [...quote.items, { ...item, id: createItemId() }],
+    state = {
+      ...state,
+      quote: {
+        ...state.quote,
+        items: [...state.quote.items, { ...item, id: createItemId() }],
+      },
     };
     emit();
   },
   updateItem(id: string, item: QuoteItemForm) {
-    quote = {
-      ...quote,
-      items: quote.items.map((existing) =>
-        existing.id === id ? { ...existing, ...item } : existing,
-      ),
+    state = {
+      ...state,
+      quote: {
+        ...state.quote,
+        items: state.quote.items.map((existing) =>
+          existing.id === id ? { ...existing, ...item } : existing,
+        ),
+      },
     };
     emit();
   },
   removeItem(id: string) {
-    quote = {
-      ...quote,
-      items: quote.items.filter((item) => item.id !== id),
+    state = {
+      ...state,
+      quote: {
+        ...state.quote,
+        items: state.quote.items.filter((item) => item.id !== id),
+      },
+    };
+    emit();
+  },
+  setPdfResult(pdfUri: string, whatsapp: string) {
+    state = {
+      ...state,
+      pdfUrl: pdfUri,
+      whatsappText: whatsapp,
     };
     emit();
   },
   reset() {
-    quote = { ...defaultQuote, items: [] };
+    state = {
+      quote: { ...defaultQuote, items: [] },
+      pdfUrl: null,
+      whatsappText: null,
+    };
     emit();
   },
 };
 
 export function useFreeQuoteStore<T>(
-  selector: (state: {
-    quote: FreeQuote;
+  selector: (state: StoreState & {
     setQuoteMeta: (meta: QuoteMetaForm) => void;
     addItem: (item: QuoteItemForm) => void;
     updateItem: (id: string, item: QuoteItemForm) => void;
     removeItem: (id: string) => void;
+    setPdfResult: (pdfUri: string, whatsapp: string) => void;
   }) => T,
 ): T {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   return selector({
-    quote: snapshot,
+    ...snapshot,
     setQuoteMeta: freeQuoteStore.setQuoteMeta,
     addItem: freeQuoteStore.addItem,
     updateItem: freeQuoteStore.updateItem,
     removeItem: freeQuoteStore.removeItem,
+    setPdfResult: freeQuoteStore.setPdfResult,
   });
 }
