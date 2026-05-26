@@ -64,7 +64,7 @@ export default function WelcomeScreen() {
               Arma un PDF profesional y compartilo directo por WhatsApp.
             </Text>
 
-            <Link href="/home" asChild>
+            <Link href="/quote/new" asChild>
               <Pressable style={styles.heroButton}>
                 <Text style={styles.heroButtonText}>+ Nuevo presupuesto</Text>
               </Pressable>
