@@ -105,6 +105,9 @@ export const freeQuoteStore = {
     };
     emit();
   },
+  resetFlow() {
+    this.reset();
+  },
 };
 
 export function useFreeQuoteStore<T>(
@@ -114,6 +117,7 @@ export function useFreeQuoteStore<T>(
     updateItem: (id: string, item: QuoteItemForm) => void;
     removeItem: (id: string) => void;
     setPdfResult: (pdfUri: string, whatsapp: string) => void;
+    resetFlow: () => void;
   }) => T,
 ): T {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
@@ -124,5 +128,6 @@ export function useFreeQuoteStore<T>(
     updateItem: freeQuoteStore.updateItem,
     removeItem: freeQuoteStore.removeItem,
     setPdfResult: freeQuoteStore.setPdfResult,
+    resetFlow: freeQuoteStore.resetFlow,
   });
 }

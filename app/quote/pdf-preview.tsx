@@ -1,17 +1,51 @@
+import * as Sharing from "expo-sharing";
 import { useRouter } from "expo-router";
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
 
 export default function QuotePdfPreviewScreen() {
   const router = useRouter();
+  const pdfUrl = useFreeQuoteStore((state) => state.pdfUrl);
   const whatsappText = useFreeQuoteStore((state) => state.whatsappText);
+  const [isSharing, setIsSharing] = useState(false);
 
-  const onShareWhatsApp = () => {
-    if (!whatsappText) return;
+  if (!pdfUrl) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
+    );
+  }
 
-    const url = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
-    void Linking.openURL(url);
+  const onSharePdf = async () => {
+    setIsSharing(true);
+    try {
+      const available = await Sharing.isAvailableAsync();
+      if (!available) {
+        Alert.alert("No disponible", "Tu dispositivo no soporta compartir archivos.");
+        return;
+      }
+
+      await Sharing.shareAsync(pdfUrl, {
+        mimeType: "application/pdf",
+        dialogTitle: "Enviar cotizacion por WhatsApp",
+        UTI: ".pdf",
+      });
+    } catch {
+      Alert.alert("Error", "No se pudo compartir el PDF.");
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -33,8 +67,23 @@ export default function QuotePdfPreviewScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <Pressable style={styles.shareButton} onPress={onShareWhatsApp}>
-          <Text style={styles.shareButtonText}>Compartir por WhatsApp</Text>
+        <Pressable
+          style={[styles.shareButton, isSharing && styles.disabled]}
+          onPress={() => void onSharePdf()}
+          disabled={isSharing}
+        >
+          {isSharing ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.shareButtonText}>Compartir PDF</Text>
+          )}
+        </Pressable>
+
+        <Pressable
+          style={styles.secondaryButton}
+          onPress={() => router.push("/quote/whatsapp-share" as never)}
+        >
+          <Text style={styles.secondaryButtonText}>Abrir WhatsApp con mensaje</Text>
         </Pressable>
 
         <Pressable style={styles.homeButton} onPress={() => router.replace("/")}>
@@ -46,6 +95,13 @@ export default function QuotePdfPreviewScreen() {
 }
 
 const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+  },
+
   container: {
     flex: 1,
     backgroundColor: "#F8FAFC",
@@ -135,6 +191,27 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "800",
     color: "#FFFFFF",
+  },
+
+  disabled: {
+    opacity: 0.85,
+  },
+
+  secondaryButton: {
+    marginTop: 14,
+    height: 56,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: "#25D366",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  secondaryButtonText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#25D366",
   },
 
   homeButton: {
