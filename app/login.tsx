@@ -1,5 +1,5 @@
 import { AntDesign } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Image,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 
 export default function LoginScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -80,7 +81,10 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            <Pressable style={styles.primaryButton}>
+            <Pressable
+              style={styles.primaryButton}
+              onPress={() => router.replace("/home")}
+            >
               <Text style={styles.primaryButtonText}>Iniciar sesión</Text>
             </Pressable>
 
