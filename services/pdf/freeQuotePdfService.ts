@@ -6,6 +6,8 @@ import type { FreeQuote } from "@/store/freeQuoteStore";
 import {
   buildFreeQuotePdfHtml,
   buildWhatsappQuoteText,
+  QUOTE_PDF_PRINT_HEIGHT,
+  QUOTE_PDF_PRINT_WIDTH,
 } from "./quotePdfTemplate";
 import { prepareShareablePdfUri } from "./shareQuotePdf";
 
@@ -21,7 +23,11 @@ export async function generateLocalFreeQuotePdf(
   const totals = getQuoteTotals(quote.items, quote.depositPercentage);
   const html = buildFreeQuotePdfHtml(quote, totals);
 
-  const { uri } = await Print.printToFileAsync({ html });
+  const { uri } = await Print.printToFileAsync({
+    html,
+    width: QUOTE_PDF_PRINT_WIDTH,
+    height: QUOTE_PDF_PRINT_HEIGHT,
+  });
   const pdfUri = await prepareShareablePdfUri(uri);
 
   return {
