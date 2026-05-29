@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -16,6 +16,10 @@ import {
   validateQuoteMeta,
 } from "@/lib/utils/freeValidators";
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
+import {
+  getQuoteExitHref,
+  syncQuoteFlowFromParam,
+} from "@/store/quoteFlowStore";
 
 function Step({ label, active }: { label: string; active?: boolean }) {
   return (
@@ -61,6 +65,7 @@ function Field({
 
 export default function NewQuoteScreen() {
   const router = useRouter();
+  const { from } = useLocalSearchParams<{ from?: string }>();
   const quote = useFreeQuoteStore((state) => state.quote);
   const setQuoteMeta = useFreeQuoteStore((state) => state.setQuoteMeta);
 
@@ -73,6 +78,14 @@ export default function NewQuoteScreen() {
     notes: quote.notes,
   });
   const [errors, setErrors] = useState<QuoteMetaErrors>({});
+
+  useEffect(() => {
+    syncQuoteFlowFromParam(from);
+  }, [from]);
+
+  const onCancel = () => {
+    router.replace(getQuoteExitHref());
+  };
 
   const updateField = <K extends keyof QuoteMetaForm>(
     key: K,
@@ -199,10 +212,7 @@ export default function NewQuoteScreen() {
           <Text style={styles.primaryButtonText}>Continuar a items</Text>
         </Pressable>
 
-        <Pressable
-          style={styles.cancelButton}
-          onPress={() => router.replace("/")}
-        >
+        <Pressable style={styles.cancelButton} onPress={onCancel}>
           <Text style={styles.cancelButtonText}>Cancelar</Text>
         </Pressable>
       </View>

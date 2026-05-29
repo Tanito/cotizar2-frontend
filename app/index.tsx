@@ -2,12 +2,13 @@ import { Link } from "expo-router";
 import {
   Image,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+
+import { WelcomeTabBar } from "@/components/welcome-tab-bar";
 
 const FEATURES = [
   {
@@ -32,7 +33,7 @@ const FEATURES = [
 
 export default function WelcomeScreen() {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -64,7 +65,7 @@ export default function WelcomeScreen() {
               Arma un PDF profesional y compartilo directo por WhatsApp.
             </Text>
 
-            <Link href="/quote/new" asChild>
+            <Link href="/quote/new?from=free" asChild>
               <Pressable style={styles.heroButton}>
                 <Text style={styles.heroButtonText}>+ Nuevo presupuesto</Text>
               </Pressable>
@@ -114,7 +115,11 @@ export default function WelcomeScreen() {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+
+      <View style={styles.tabBarWrap}>
+        <WelcomeTabBar />
+      </View>
+    </View>
   );
 }
 
@@ -126,6 +131,14 @@ const styles = StyleSheet.create({
 
   scroll: {
     flexGrow: 1,
+    paddingBottom: 100,
+  },
+
+  tabBarWrap: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 
   content: {

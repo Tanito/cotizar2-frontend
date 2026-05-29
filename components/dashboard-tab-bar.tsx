@@ -1,4 +1,4 @@
-import { Link } from "expo-router";
+import { Link, type Href } from "expo-router";
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,18 +20,27 @@ type DashboardTabBarProps = {
 const INACTIVE = "#9CA3AF";
 const ACTIVE = "#2563EB";
 
+const TAB_ROUTES: Record<DashboardTab, string> = {
+  home: "/home",
+  history: "/history",
+  clients: "/clients",
+  more: "/more",
+};
+
 export function DashboardTabBar({ activeTab = "home" }: DashboardTabBarProps) {
   const insets = useSafeAreaInsets();
 
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-      <TabItem
+      <TabLink
+        href={TAB_ROUTES.home}
         label="Inicio"
         active={activeTab === "home"}
         icon={<HomeIcon color={activeTab === "home" ? ACTIVE : INACTIVE} />}
       />
 
-      <TabItem
+      <TabLink
+        href={TAB_ROUTES.history}
         label="Historial"
         active={activeTab === "history"}
         icon={
@@ -39,13 +48,14 @@ export function DashboardTabBar({ activeTab = "home" }: DashboardTabBarProps) {
         }
       />
 
-      <Link href="/quote/new" asChild>
+      <Link href="/quote/new?from=premium" asChild>
         <Pressable style={styles.fab}>
           <PlusIcon size={26} />
         </Pressable>
       </Link>
 
-      <TabItem
+      <TabLink
+        href={TAB_ROUTES.clients}
         label="Clientes"
         active={activeTab === "clients"}
         icon={
@@ -53,7 +63,8 @@ export function DashboardTabBar({ activeTab = "home" }: DashboardTabBarProps) {
         }
       />
 
-      <TabItem
+      <TabLink
+        href={TAB_ROUTES.more}
         label="Más"
         active={activeTab === "more"}
         icon={<MoreIcon color={activeTab === "more" ? ACTIVE : INACTIVE} />}
@@ -62,22 +73,26 @@ export function DashboardTabBar({ activeTab = "home" }: DashboardTabBarProps) {
   );
 }
 
-function TabItem({
+function TabLink({
+  href,
   label,
   icon,
   active,
 }: {
+  href: string;
   label: string;
   icon: ReactNode;
   active?: boolean;
 }) {
   return (
-    <View style={styles.tab}>
-      {icon}
-      <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>
-        {label}
-      </Text>
-    </View>
+    <Link href={href as never} asChild>
+      <Pressable style={styles.tab}>
+        {icon}
+        <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>
+          {label}
+        </Text>
+      </Pressable>
+    </Link>
   );
 }
 

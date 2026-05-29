@@ -8,7 +8,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BellIcon, DocumentIcon } from "@/components/dashboard-icons";
-import { DashboardTabBar } from "@/components/dashboard-tab-bar";
+import { DashboardScreen } from "@/components/dashboard-screen";
+import { Link, type Href } from "expo-router";
 
 const STATS = [
   { value: "12", label: "Presupuestos este mes", color: "#2563EB" },
@@ -42,7 +43,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.screen}>
+    <DashboardScreen activeTab="home" backgroundColor="#F8FAFC">
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={{ paddingBottom: 100, paddingTop: 10}}
@@ -78,9 +79,11 @@ export default function HomeScreen() {
         <View style={styles.body}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Actividad reciente</Text>
-            <Pressable hitSlop={8}>
-              <Text style={styles.sectionLink}>Ver todos</Text>
-            </Pressable>
+            <Link href={"/history" as Href} asChild>
+              <Pressable hitSlop={8}>
+                <Text style={styles.sectionLink}>Ver todos</Text>
+              </Pressable>
+            </Link>
           </View>
 
           <View style={styles.activityList}>
@@ -106,20 +109,11 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
-
-      <View style={styles.tabBarWrap}>
-        <DashboardTabBar activeTab="home" />
-      </View>
-    </View>
+    </DashboardScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: "#F8FAFC",
-  },
-
   scroll: {
     flex: 1,
   },
@@ -291,12 +285,5 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontSize: 12,
     color: "#9CA3AF",
-  },
-
-  tabBarWrap: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
   },
 });

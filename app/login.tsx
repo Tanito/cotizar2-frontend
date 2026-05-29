@@ -1,5 +1,9 @@
 import { AntDesign } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
+import {
+  setLoggedIn,
+  setQuoteFlowOrigin,
+} from "@/store/quoteFlowStore";
 import { useState } from "react";
 import {
   Image,
@@ -83,7 +87,11 @@ export default function LoginScreen() {
 
             <Pressable
               style={styles.primaryButton}
-              onPress={() => router.replace("/home")}
+              onPress={() => {
+                setLoggedIn(true);
+                setQuoteFlowOrigin("premium");
+                router.replace("/home");
+              }}
             >
               <Text style={styles.primaryButtonText}>Iniciar sesión</Text>
             </Pressable>
@@ -105,6 +113,18 @@ export default function LoginScreen() {
                 Crear cuenta
               </Link>
             </Text>
+
+            <Pressable
+              style={styles.indexButton}
+              onPress={() => {
+                setQuoteFlowOrigin("free");
+                router.replace("/");
+              }}
+            >
+              <Text style={styles.indexButtonText}>
+                Ir al inicio (versión gratis)
+              </Text>
+            </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -281,6 +301,23 @@ const styles = StyleSheet.create({
 
   footerLink: {
     fontWeight: "700",
+    color: "#2563EB",
+  },
+
+  indexButton: {
+    marginTop: 16,
+    height: 52,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#2563EB",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  indexButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
     color: "#2563EB",
   },
 });
