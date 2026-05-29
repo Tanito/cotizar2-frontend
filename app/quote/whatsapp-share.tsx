@@ -1,3 +1,4 @@
+import * as FileSystem from "expo-file-system";
 import * as Linking from "expo-linking";
 import * as Sharing from "expo-sharing";
 import { useRouter } from "expo-router";
@@ -6,6 +7,23 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-nati
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
 
 export default function WhatsappShareScreen() {
+  const getShareablePdfUri = async (uri: string) => {
+    const info = await FileSystem.getInfoAsync(uri);
+    if (!info.exists) {
+      throw new Error("No se encontró el archivo PDF.");
+    }
+
+    const shareDir = `${FileSystem.cacheDirectory}share/`;
+    const dirInfo = await FileSystem.getInfoAsync(shareDir);
+    if (!dirInfo.exists) {
+      await FileSystem.makeDirectoryAsync(shareDir, { intermediates: true });
+    }
+
+    const targetUri = `${shareDir}cotizacion-${Date.now()}.pdf`;
+    await FileSystem.copyAsync({ from: uri, to: targetUri });
+    return targetUri;
+  };
+
   const router = useRouter();
   const whatsappText = useFreeQuoteStore((state) => state.whatsappText);
   const pdfUrl = useFreeQuoteStore((state) => state.pdfUrl);
@@ -47,11 +65,21 @@ export default function WhatsappShareScreen() {
       return;
     }
 
-    await Sharing.shareAsync(pdfUrl, {
-      mimeType: "application/pdf",
-      dialogTitle: "Enviar cotizacion por WhatsApp",
-      UTI: ".pdf",
-    });
+    if (!pdfUrl.startsWith("file://")) {
+      Alert.alert("PDF invalido", "Genera nuevamente el PDF para compartirlo.");
+      return;
+    }
+
+    const shareableUri = await getShareablePdfUri(pdfUrl);
+
+    try {
+      await Sharing.shareAsync(shareableUri, {
+        mimeType: "application/pdf",
+        dialogTitle: "Enviar cotizacion por WhatsApp",
+      });
+    } catch {
+      await Sharing.shareAsync(shareableUri);
+    }
   };
 
   return (

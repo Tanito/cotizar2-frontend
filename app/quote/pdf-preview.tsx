@@ -1,3 +1,4 @@
+import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -27,6 +28,23 @@ export default function QuotePdfPreviewScreen() {
     );
   }
 
+  const getShareablePdfUri = async (uri: string) => {
+    const info = await FileSystem.getInfoAsync(uri);
+    if (!info.exists) {
+      throw new Error("No se encontró el archivo PDF.");
+    }
+
+    const shareDir = `${FileSystem.cacheDirectory}share/`;
+    const dirInfo = await FileSystem.getInfoAsync(shareDir);
+    if (!dirInfo.exists) {
+      await FileSystem.makeDirectoryAsync(shareDir, { intermediates: true });
+    }
+
+    const targetUri = `${shareDir}cotizacion-${Date.now()}.pdf`;
+    await FileSystem.copyAsync({ from: uri, to: targetUri });
+    return targetUri;
+  };
+
   const onSharePdf = async () => {
     setIsSharing(true);
     try {
@@ -36,13 +54,28 @@ export default function QuotePdfPreviewScreen() {
         return;
       }
 
-      await Sharing.shareAsync(pdfUrl, {
-        mimeType: "application/pdf",
-        dialogTitle: "Enviar cotizacion por WhatsApp",
-        UTI: ".pdf",
-      });
-    } catch {
-      Alert.alert("Error", "No se pudo compartir el PDF.");
+      if (!pdfUrl.startsWith("file://")) {
+        Alert.alert(
+          "PDF invalido",
+          "Genera nuevamente el PDF para poder compartirlo.",
+        );
+        return;
+      }
+
+      const shareableUri = await getShareablePdfUri(pdfUrl);
+
+      try {
+        await Sharing.shareAsync(shareableUri, {
+          mimeType: "application/pdf",
+          dialogTitle: "Enviar cotizacion por WhatsApp",
+        });
+      } catch {
+        // Some Android share targets reject extra options; retry with URI only.
+        await Sharing.shareAsync(shareableUri);
+      }
+    } catch (error) {
+      const detail = error instanceof Error ? `\n\n${error.message}` : "";
+      Alert.alert("Error", `No se pudo compartir el PDF.${detail}`);
     } finally {
       setIsSharing(false);
     }
