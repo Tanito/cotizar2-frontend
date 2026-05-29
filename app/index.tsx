@@ -45,7 +45,7 @@ export default function WelcomeScreen() {
           />
 
           <Text style={styles.tagline}>
-            Presupuestos profesionales para tecnicos y oficios.{"\n"}Sin
+            Presupuestos profesionales para tecnicos y oficios. Sin
             registro.
           </Text>
 
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginTop: 32,
     marginBottom: 20,
-    fontSize: 54,
+    fontSize: 34,
     lineHeight: 58,
     fontWeight: "800",
     color: "#0F172A",
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
 
   featureTitle: {
-    fontSize: 50,
+    fontSize: 30,
     lineHeight: 56,
     fontWeight: "800",
     color: "#0F172A",
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
 
   premiumBadgeText: {
-    fontSize: 13,
+    fontSize: 20,
     fontWeight: "800",
     letterSpacing: 0.5,
     color: "#2563EB",
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
 
   premiumTitle: {
     marginTop: 20,
-    fontSize: 60,
+    fontSize: 30,
     lineHeight: 64,
     fontWeight: "800",
     color: "#0F172A",
