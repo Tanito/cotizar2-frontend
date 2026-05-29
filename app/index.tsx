@@ -101,7 +101,7 @@ export default function WelcomeScreen() {
               Clientes, historial, catalogo de precios, branding y mas.
             </Text>
 
-            <Link href="/register" asChild>
+            <Link href="/login" asChild>
               <Pressable style={styles.premiumButton}>
                 <Text style={styles.premiumButtonText}>Ver Premium</Text>
               </Pressable>
