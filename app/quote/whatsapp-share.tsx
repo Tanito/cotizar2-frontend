@@ -1,8 +1,19 @@
 import * as Linking from "expo-linking";
-import * as Sharing from "expo-sharing";
 import { useRouter } from "expo-router";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
+import {
+  alertPdfShareError,
+  shareQuotePdf,
+} from "@/services/pdf/shareQuotePdf";
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
 
 export default function WhatsappShareScreen() {
@@ -10,6 +21,7 @@ export default function WhatsappShareScreen() {
   const whatsappText = useFreeQuoteStore((state) => state.whatsappText);
   const pdfUrl = useFreeQuoteStore((state) => state.pdfUrl);
   const resetFlow = useFreeQuoteStore((state) => state.resetFlow);
+  const [isSharingPdf, setIsSharingPdf] = useState(false);
 
   if (!whatsappText || !pdfUrl) {
     return (
@@ -38,20 +50,14 @@ export default function WhatsappShareScreen() {
   };
 
   const onSharePdf = async () => {
-    const isAvailable = await Sharing.isAvailableAsync();
-    if (!isAvailable) {
-      Alert.alert(
-        "Compartir no disponible",
-        "Abre el PDF y compartelo manualmente desde tu dispositivo.",
-      );
-      return;
+    setIsSharingPdf(true);
+    try {
+      await shareQuotePdf(pdfUrl);
+    } catch (error) {
+      alertPdfShareError(error);
+    } finally {
+      setIsSharingPdf(false);
     }
-
-    await Sharing.shareAsync(pdfUrl, {
-      mimeType: "application/pdf",
-      dialogTitle: "Enviar cotizacion por WhatsApp",
-      UTI: ".pdf",
-    });
   };
 
   return (
@@ -80,8 +86,16 @@ export default function WhatsappShareScreen() {
         <Pressable style={styles.whatsButton} onPress={() => void onWhatsappShortcut()}>
           <Text style={styles.whatsButtonText}>Compartir por WhatsApp</Text>
         </Pressable>
-        <Pressable style={styles.secondaryButton} onPress={() => void onSharePdf()}>
-          <Text style={styles.secondaryButtonText}>Compartir PDF</Text>
+        <Pressable
+          style={[styles.secondaryButton, isSharingPdf && styles.disabled]}
+          onPress={() => void onSharePdf()}
+          disabled={isSharingPdf}
+        >
+          {isSharingPdf ? (
+            <ActivityIndicator color="#2563EB" />
+          ) : (
+            <Text style={styles.secondaryButtonText}>Compartir PDF</Text>
+          )}
         </Pressable>
         <Pressable
           style={styles.ghostButton}
@@ -226,6 +240,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#2563EB",
+  },
+
+  disabled: {
+    opacity: 0.85,
   },
 
   ghostButton: {

@@ -1,9 +1,7 @@
-import * as Sharing from "expo-sharing";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +9,10 @@ import {
   View,
 } from "react-native";
 
+import {
+  alertPdfShareError,
+  shareQuotePdf,
+} from "@/services/pdf/shareQuotePdf";
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
 
 export default function QuotePdfPreviewScreen() {
@@ -30,19 +32,9 @@ export default function QuotePdfPreviewScreen() {
   const onSharePdf = async () => {
     setIsSharing(true);
     try {
-      const available = await Sharing.isAvailableAsync();
-      if (!available) {
-        Alert.alert("No disponible", "Tu dispositivo no soporta compartir archivos.");
-        return;
-      }
-
-      await Sharing.shareAsync(pdfUrl, {
-        mimeType: "application/pdf",
-        dialogTitle: "Enviar cotizacion por WhatsApp",
-        UTI: ".pdf",
-      });
-    } catch {
-      Alert.alert("Error", "No se pudo compartir el PDF.");
+      await shareQuotePdf(pdfUrl);
+    } catch (error) {
+      alertPdfShareError(error);
     } finally {
       setIsSharing(false);
     }
