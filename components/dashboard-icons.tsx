@@ -5,6 +5,25 @@ type IconProps = {
   color?: string;
 };
 
+export function DiamondIcon({ size = 26, color = "#FFFFFF" }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 2L20 8.5V15.5L12 22L4 15.5V8.5L12 2Z"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M4 8.5H20M8 8.5L12 2L16 8.5M8 15.5L12 22L16 15.5"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 export function HomeIcon({ size = 24, color = "#2563EB" }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
