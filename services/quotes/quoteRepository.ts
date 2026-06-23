@@ -72,7 +72,7 @@ class LocalQuoteRepository implements QuoteRepository {
   }
 
   private async ensureLoaded(): Promise<Quote[]> {
-    if (this.cache) {
+    if (this.cache !== null) {
       return this.cache;
     }
 

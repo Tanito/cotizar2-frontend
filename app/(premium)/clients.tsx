@@ -1,4 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useRef } from "react";
 import {
   Pressable,
   ScrollView,
@@ -11,61 +13,17 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DashboardScreen } from "@/components/dashboard-screen";
 import { PremiumGate } from "@/components/premium-gate";
-
-type Client = {
-  id: string;
-  name: string;
-  phone: string;
-  quotes: number;
-  initials: string;
-  color: string;
-};
-
-const CLIENTS: Client[] = [
-  {
-    id: "1",
-    name: "Juan Pérez",
-    phone: "+54 11 1234-5678",
-    quotes: 3,
-    initials: "JP",
-    color: "#2563EB",
-  },
-  {
-    id: "2",
-    name: "María Gómez",
-    phone: "+54 11 9876-5432",
-    quotes: 2,
-    initials: "MG",
-    color: "#7C3AED",
-  },
-  {
-    id: "3",
-    name: "Empresa SRL",
-    phone: "+54 11 5555-0000",
-    quotes: 5,
-    initials: "ES",
-    color: "#0F172A",
-  },
-  {
-    id: "4",
-    name: "Lucas Martínez",
-    phone: "+54 11 4444-1111",
-    quotes: 1,
-    initials: "LM",
-    color: "#16A34A",
-  },
-  {
-    id: "5",
-    name: "Ana Torres",
-    phone: "+54 11 2222-3333",
-    quotes: 2,
-    initials: "AT",
-    color: "#EA580C",
-  },
-];
+import { useClients } from "@/hooks/useClients";
+import {
+  getClientColor,
+  getClientInitials,
+} from "@/lib/utils/clientDisplay";
 
 export default function ClientsScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const searchRef = useRef<TextInput>(null);
+  const { visibleClients, searchQuery, setSearchQuery } = useClients();
 
   return (
     <PremiumGate>
@@ -73,10 +31,18 @@ export default function ClientsScreen() {
         <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
           <Text style={styles.title}>Clientes</Text>
           <View style={styles.headerActions}>
-            <Pressable hitSlop={8} style={styles.iconButton}>
+            <Pressable
+              hitSlop={8}
+              style={styles.iconButton}
+              onPress={() => searchRef.current?.focus()}
+            >
               <Ionicons name="search-outline" size={22} color="#0F172A" />
             </Pressable>
-            <Pressable hitSlop={8} style={styles.iconButton}>
+            <Pressable
+              hitSlop={8}
+              style={styles.iconButton}
+              onPress={() => router.push("/new-client")}
+            >
               <Ionicons name="add" size={26} color="#0F172A" />
             </Pressable>
           </View>
@@ -90,9 +56,14 @@ export default function ClientsScreen() {
             style={styles.searchIcon}
           />
           <TextInput
+            ref={searchRef}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
             placeholder="Buscar clientes"
             placeholderTextColor="#9CA3AF"
             style={styles.searchInput}
+            autoCapitalize="none"
+            autoCorrect={false}
           />
         </View>
 
@@ -100,27 +71,33 @@ export default function ClientsScreen() {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
         >
-          {CLIENTS.map((client) => (
-            <Pressable key={client.id} style={styles.row}>
-              <View
-                style={[styles.avatar, { backgroundColor: `${client.color}18` }]}
-              >
-                <Text style={[styles.avatarText, { color: client.color }]}>
-                  {client.initials}
+          {visibleClients.map((client) => {
+            const initials = getClientInitials(client.name);
+            const color = getClientColor(client.name);
+
+            return (
+              <Pressable key={client.id} style={styles.row}>
+                <View
+                  style={[
+                    styles.avatar,
+                    { backgroundColor: `${color}18` },
+                  ]}
+                >
+                  <Text style={[styles.avatarText, { color }]}>{initials}</Text>
+                </View>
+
+                <View style={styles.rowContent}>
+                  <Text style={styles.name}>{client.name}</Text>
+                  <Text style={styles.phone}>{client.phone}</Text>
+                </View>
+
+                <Text style={styles.quotes}>
+                  {client.quoteCount}{" "}
+                  {client.quoteCount === 1 ? "presupuesto" : "presupuestos"}
                 </Text>
-              </View>
-
-              <View style={styles.rowContent}>
-                <Text style={styles.name}>{client.name}</Text>
-                <Text style={styles.phone}>{client.phone}</Text>
-              </View>
-
-              <Text style={styles.quotes}>
-                {client.quotes}{" "}
-                {client.quotes === 1 ? "presupuesto" : "presupuestos"}
-              </Text>
-            </Pressable>
-          ))}
+              </Pressable>
+            );
+          })}
         </ScrollView>
       </DashboardScreen>
     </PremiumGate>
