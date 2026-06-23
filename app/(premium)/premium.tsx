@@ -61,10 +61,10 @@ export default function PremiumPlansScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.intro}>
+        {/* <Text style={styles.intro}>
           Fase 1: suscripción local con Google Play Billing. Fase 2: nube,
           multi-dispositivo y validación remota.
-        </Text>
+        </Text> */}
 
         <View style={styles.statusCard}>
           <Text style={styles.statusLabel}>Estado actual</Text>
@@ -101,9 +101,12 @@ export default function PremiumPlansScreen() {
 
           <FeatureList items={CLOUD_FEATURES} />
 
-          <Text style={styles.disclaimer}>
+          {/* <Text style={styles.disclaimer}>
             No hay backend todavía. Esta pantalla deja el camino preparado para
             `CloudSubscriptionService`, `GoogleAuthService` y `SyncService`.
+          </Text> */}
+          <Text style={styles.disclaimer}>
+            Proximamente
           </Text>
         </View>
 

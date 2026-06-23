@@ -3,8 +3,8 @@ import { Link, type Href } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { DashboardScreen } from "@/components/dashboard-screen";
 import { ChevronRightIcon } from "@/components/dashboard-icons";
+import { DashboardScreen } from "@/components/dashboard-screen";
 import { PremiumGate } from "@/components/premium-gate";
 import { subscriptionService } from "@/services/subscriptions/subscriptionService";
 
@@ -76,8 +76,8 @@ export default function MoreScreen() {
       title: "Herramientas",
       items: [
         { label: "Catálogo", icon: "grid-outline", href: "/catalog" },
-        { label: "Plantillas", icon: "copy-outline" },
-        { label: "Chat de ayuda", icon: "chatbubble-ellipses-outline" },
+        // { label: "Plantillas", icon: "copy-outline" },
+        // { label: "Chat de ayuda", icon: "chatbubble-ellipses-outline" },
       ],
     },
     {
