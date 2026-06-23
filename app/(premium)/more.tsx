@@ -60,10 +60,16 @@ export default function MoreScreen() {
     {
       title: "Mi negocio",
       items: [
-        { label: "Perfil de mi negocio", icon: "person-outline" },
-        { label: "Marca y logo", icon: "color-palette-outline" },
-        { label: "Valores por defecto", icon: "document-text-outline" },
-        { label: "Formas de pago", icon: "wallet-outline" },
+        {
+          label: "Perfil de mi negocio",
+          icon: "person-outline",
+          href: "/business-profile",
+        },
+        {
+          label: "Marca y logo",
+          icon: "color-palette-outline",
+          href: "/branding",
+        },
       ],
     },
     {
