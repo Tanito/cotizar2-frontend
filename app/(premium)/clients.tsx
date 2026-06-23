@@ -10,6 +10,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DashboardScreen } from "@/components/dashboard-screen";
+import { PremiumGate } from "@/components/premium-gate";
 
 type Client = {
   id: string;
@@ -67,60 +68,62 @@ export default function ClientsScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <DashboardScreen activeTab="clients">
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Text style={styles.title}>Clientes</Text>
-        <View style={styles.headerActions}>
-          <Pressable hitSlop={8} style={styles.iconButton}>
-            <Ionicons name="search-outline" size={22} color="#0F172A" />
-          </Pressable>
-          <Pressable hitSlop={8} style={styles.iconButton}>
-            <Ionicons name="add" size={26} color="#0F172A" />
-          </Pressable>
+    <PremiumGate>
+      <DashboardScreen activeTab="clients">
+        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+          <Text style={styles.title}>Clientes</Text>
+          <View style={styles.headerActions}>
+            <Pressable hitSlop={8} style={styles.iconButton}>
+              <Ionicons name="search-outline" size={22} color="#0F172A" />
+            </Pressable>
+            <Pressable hitSlop={8} style={styles.iconButton}>
+              <Ionicons name="add" size={26} color="#0F172A" />
+            </Pressable>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.searchWrap}>
-        <Ionicons
-          name="search-outline"
-          size={18}
-          color="#9CA3AF"
-          style={styles.searchIcon}
-        />
-        <TextInput
-          placeholder="Buscar clientes"
-          placeholderTextColor="#9CA3AF"
-          style={styles.searchInput}
-        />
-      </View>
+        <View style={styles.searchWrap}>
+          <Ionicons
+            name="search-outline"
+            size={18}
+            color="#9CA3AF"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            placeholder="Buscar clientes"
+            placeholderTextColor="#9CA3AF"
+            style={styles.searchInput}
+          />
+        </View>
 
-      <ScrollView
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      >
-        {CLIENTS.map((client) => (
-          <Pressable key={client.id} style={styles.row}>
-            <View
-              style={[styles.avatar, { backgroundColor: `${client.color}18` }]}
-            >
-              <Text style={[styles.avatarText, { color: client.color }]}>
-                {client.initials}
+        <ScrollView
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+        >
+          {CLIENTS.map((client) => (
+            <Pressable key={client.id} style={styles.row}>
+              <View
+                style={[styles.avatar, { backgroundColor: `${client.color}18` }]}
+              >
+                <Text style={[styles.avatarText, { color: client.color }]}>
+                  {client.initials}
+                </Text>
+              </View>
+
+              <View style={styles.rowContent}>
+                <Text style={styles.name}>{client.name}</Text>
+                <Text style={styles.phone}>{client.phone}</Text>
+              </View>
+
+              <Text style={styles.quotes}>
+                {client.quotes}{" "}
+                {client.quotes === 1 ? "presupuesto" : "presupuestos"}
               </Text>
-            </View>
-
-            <View style={styles.rowContent}>
-              <Text style={styles.name}>{client.name}</Text>
-              <Text style={styles.phone}>{client.phone}</Text>
-            </View>
-
-            <Text style={styles.quotes}>
-              {client.quotes}{" "}
-              {client.quotes === 1 ? "presupuesto" : "presupuestos"}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-    </DashboardScreen>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </DashboardScreen>
+    </PremiumGate>
   );
 }
 

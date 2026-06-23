@@ -1,6 +1,12 @@
 import { useSyncExternalStore } from "react";
 
 import type { QuoteItemForm, QuoteMetaForm } from "@/lib/utils/freeValidators";
+import { createUuid } from "@/lib/utils/createUuid";
+import {
+  markCurrentQuoteAsSent,
+  persistCurrentQuoteDraft,
+  resetCurrentQuoteDraftContext,
+} from "@/services/quotes/quoteDraftSync";
 
 export type QuoteItem = QuoteItemForm & {
   id: string;
@@ -48,7 +54,7 @@ function getSnapshot() {
 }
 
 function createItemId() {
-  return `item-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  return createUuid();
 }
 
 export const freeQuoteStore = {
@@ -56,6 +62,9 @@ export const freeQuoteStore = {
   setQuoteMeta(meta: QuoteMetaForm) {
     state = { ...state, quote: { ...state.quote, ...meta } };
     emit();
+    void persistCurrentQuoteDraft(state.quote).catch((error) => {
+      console.error("Failed to persist draft quote", error);
+    });
   },
   addItem(item: QuoteItemForm) {
     state = {
@@ -66,6 +75,9 @@ export const freeQuoteStore = {
       },
     };
     emit();
+    void persistCurrentQuoteDraft(state.quote).catch((error) => {
+      console.error("Failed to persist draft quote", error);
+    });
   },
   updateItem(id: string, item: QuoteItemForm) {
     state = {
@@ -78,6 +90,9 @@ export const freeQuoteStore = {
       },
     };
     emit();
+    void persistCurrentQuoteDraft(state.quote).catch((error) => {
+      console.error("Failed to persist draft quote", error);
+    });
   },
   removeItem(id: string) {
     state = {
@@ -88,6 +103,9 @@ export const freeQuoteStore = {
       },
     };
     emit();
+    void persistCurrentQuoteDraft(state.quote).catch((error) => {
+      console.error("Failed to persist draft quote", error);
+    });
   },
   setPdfResult(pdfUri: string, whatsapp: string) {
     state = {
@@ -97,12 +115,20 @@ export const freeQuoteStore = {
     };
     emit();
   },
+  async markAsSent() {
+    try {
+      await markCurrentQuoteAsSent(state.quote);
+    } catch (error) {
+      console.error("Failed to persist sent quote", error);
+    }
+  },
   reset() {
     state = {
       quote: { ...defaultQuote, items: [] },
       pdfUrl: null,
       whatsappText: null,
     };
+    resetCurrentQuoteDraftContext();
     emit();
   },
   resetFlow() {
@@ -117,6 +143,7 @@ export function useFreeQuoteStore<T>(
     updateItem: (id: string, item: QuoteItemForm) => void;
     removeItem: (id: string) => void;
     setPdfResult: (pdfUri: string, whatsapp: string) => void;
+    markAsSent: () => Promise<void>;
     resetFlow: () => void;
   }) => T,
 ): T {
@@ -128,6 +155,7 @@ export function useFreeQuoteStore<T>(
     updateItem: freeQuoteStore.updateItem,
     removeItem: freeQuoteStore.removeItem,
     setPdfResult: freeQuoteStore.setPdfResult,
+    markAsSent: freeQuoteStore.markAsSent,
     resetFlow: freeQuoteStore.resetFlow,
   });
 }

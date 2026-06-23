@@ -16,7 +16,7 @@ export function WelcomeTabBar() {
       <View style={styles.spacer} />
 
       <View style={styles.centerTab}>
-        <Link href="/login" asChild>
+        <Link href="/home" asChild>
           <Pressable style={styles.fab}>
             <Ionicons name="diamond-outline" size={26} color="#FFFFFF" />
           </Pressable>

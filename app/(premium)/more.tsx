@@ -1,11 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Link, useRouter, type Href } from "expo-router";
+import { Link, type Href } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DashboardScreen } from "@/components/dashboard-screen";
 import { ChevronRightIcon } from "@/components/dashboard-icons";
-import { setLoggedIn, setQuoteFlowOrigin } from "@/store/quoteFlowStore";
+import { PremiumGate } from "@/components/premium-gate";
+import { subscriptionService } from "@/services/subscriptions/subscriptionService";
 
 type MenuItem = {
   label: string;
@@ -54,7 +55,6 @@ function MenuRow({ item }: { item: MenuItem }) {
 
 export default function MoreScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
 
   const sections: MenuSection[] = [
     {
@@ -75,43 +75,43 @@ export default function MoreScreen() {
       ],
     },
     {
-      title: "Cuenta",
+      title: "Suscripción",
       items: [
         {
-          label: "Cerrar sesión",
-          icon: "log-out-outline",
-          danger: true,
+          label: "Restaurar compras",
+          icon: "refresh-outline",
           onPress: () => {
-            setLoggedIn(false);
-            setQuoteFlowOrigin("free");
-            router.replace("/login");
+            void subscriptionService.restorePurchases();
           },
         },
+        { label: "Ver planes", icon: "diamond-outline", href: "/premium" },
       ],
     },
   ];
 
   return (
-    <DashboardScreen activeTab="more">
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Text style={styles.title}>Más</Text>
-      </View>
+    <PremiumGate>
+      <DashboardScreen activeTab="more">
+        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+          <Text style={styles.title}>Más</Text>
+        </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        {sections.map((section) => (
-          <View key={section.title} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          {sections.map((section) => (
+            <View key={section.title} style={styles.section}>
+              <Text style={styles.sectionTitle}>{section.title}</Text>
 
-            {section.items.map((item) => (
-              <MenuRow key={item.label} item={item} />
-            ))}
-          </View>
-        ))}
-      </ScrollView>
-    </DashboardScreen>
+              {section.items.map((item) => (
+                <MenuRow key={item.label} item={item} />
+              ))}
+            </View>
+          ))}
+        </ScrollView>
+      </DashboardScreen>
+    </PremiumGate>
   );
 }
 

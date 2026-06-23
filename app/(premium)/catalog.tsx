@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DashboardTabBar } from "@/components/dashboard-tab-bar";
+import { PremiumGate } from "@/components/premium-gate";
 
 type CatalogTab = "Productos" | "Servicios";
 
@@ -69,72 +70,74 @@ export default function CatalogScreen() {
   const items = ITEMS.filter((item) => item.type === activeTab);
 
   return (
-    <View style={styles.screen}>
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Pressable onPress={() => router.back()} hitSlop={8}>
-          <Ionicons name="arrow-back" size={24} color="#0F172A" />
-        </Pressable>
-        <Text style={styles.title}>Catálogo</Text>
-        <Pressable hitSlop={8} style={styles.addButton}>
-          <Ionicons name="add" size={26} color="#0F172A" />
-        </Pressable>
-      </View>
+    <PremiumGate>
+      <View style={styles.screen}>
+        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+          <Pressable onPress={() => router.back()} hitSlop={8}>
+            <Ionicons name="arrow-back" size={24} color="#0F172A" />
+          </Pressable>
+          <Text style={styles.title}>Catálogo</Text>
+          <Pressable hitSlop={8} style={styles.addButton}>
+            <Ionicons name="add" size={26} color="#0F172A" />
+          </Pressable>
+        </View>
 
-      <View style={styles.searchWrap}>
-        <Ionicons
-          name="search-outline"
-          size={18}
-          color="#9CA3AF"
-          style={styles.searchIcon}
-        />
-        <TextInput
-          placeholder="Buscar productos o servicios"
-          placeholderTextColor="#9CA3AF"
-          style={styles.searchInput}
-        />
-      </View>
+        <View style={styles.searchWrap}>
+          <Ionicons
+            name="search-outline"
+            size={18}
+            color="#9CA3AF"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            placeholder="Buscar productos o servicios"
+            placeholderTextColor="#9CA3AF"
+            style={styles.searchInput}
+          />
+        </View>
 
-      <View style={styles.tabs}>
-        {(["Productos", "Servicios"] as const).map((tab) => {
-          const active = activeTab === tab;
-          return (
-            <Pressable
-              key={tab}
-              onPress={() => setActiveTab(tab)}
-              style={styles.tab}
-            >
-              <Text style={[styles.tabText, active && styles.tabTextActive]}>
-                {tab}
-              </Text>
-              {active ? <View style={styles.tabIndicator} /> : null}
-            </Pressable>
-          );
-        })}
-      </View>
+        <View style={styles.tabs}>
+          {(["Productos", "Servicios"] as const).map((tab) => {
+            const active = activeTab === tab;
+            return (
+              <Pressable
+                key={tab}
+                onPress={() => setActiveTab(tab)}
+                style={styles.tab}
+              >
+                <Text style={[styles.tabText, active && styles.tabTextActive]}>
+                  {tab}
+                </Text>
+                {active ? <View style={styles.tabIndicator} /> : null}
+              </Pressable>
+            );
+          })}
+        </View>
 
-      <ScrollView
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      >
-        {items.map((item) => (
-          <View key={item.id} style={styles.row}>
-            <View style={styles.rowIcon}>
-              <Ionicons name="cube-outline" size={18} color="#9CA3AF" />
+        <ScrollView
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+        >
+          {items.map((item) => (
+            <View key={item.id} style={styles.row}>
+              <View style={styles.rowIcon}>
+                <Ionicons name="cube-outline" size={18} color="#9CA3AF" />
+              </View>
+              <Text style={styles.rowName}>{item.name}</Text>
+              <Text style={styles.rowPrice}>{item.price}</Text>
             </View>
-            <Text style={styles.rowName}>{item.name}</Text>
-            <Text style={styles.rowPrice}>{item.price}</Text>
-          </View>
-        ))}
+          ))}
 
-        <Pressable style={styles.seeAll}>
-          <Text style={styles.seeAllText}>Ver todos</Text>
-        </Pressable>
-      </ScrollView>
+          <Pressable style={styles.seeAll}>
+            <Text style={styles.seeAllText}>Ver todos</Text>
+          </Pressable>
+        </ScrollView>
 
-      <View style={styles.tabBarWrap}>
-        <DashboardTabBar activeTab="more" />
+        <View style={styles.tabBarWrap}>
+          <DashboardTabBar activeTab="more" />
+        </View>
       </View>
-    </View>
+    </PremiumGate>
   );
 }
 

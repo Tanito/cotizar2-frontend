@@ -20,6 +20,7 @@ export default function WhatsappShareScreen() {
   const router = useRouter();
   const whatsappText = useFreeQuoteStore((state) => state.whatsappText);
   const pdfUrl = useFreeQuoteStore((state) => state.pdfUrl);
+  const markAsSent = useFreeQuoteStore((state) => state.markAsSent);
   const resetFlow = useFreeQuoteStore((state) => state.resetFlow);
   const [isSharingPdf, setIsSharingPdf] = useState(false);
 
@@ -46,6 +47,7 @@ export default function WhatsappShareScreen() {
   const onWhatsappShortcut = async () => {
     const canOpenWhatsapp = await Linking.canOpenURL(whatsappAppUrl);
     const target = canOpenWhatsapp ? whatsappAppUrl : whatsappWebUrl;
+    await markAsSent();
     await Linking.openURL(target);
   };
 

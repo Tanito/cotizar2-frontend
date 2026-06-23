@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BellIcon, DocumentIcon } from "@/components/dashboard-icons";
 import { DashboardScreen } from "@/components/dashboard-screen";
+import { PremiumGate } from "@/components/premium-gate";
 import { Link, type Href } from "expo-router";
 
 const STATS = [
@@ -43,73 +44,75 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <DashboardScreen activeTab="home" backgroundColor="#F8FAFC">
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={{ paddingBottom: 100, paddingTop: 10}}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-          <View style={styles.headerTop}>
-            <View style={styles.headerText}>
-              <Text style={styles.greeting}>¡Hola, Juan! 👋</Text>
-              <Text style={styles.subtitle}>
-                Acá tenés el resumen de tu negocio.
-              </Text>
+    <PremiumGate>
+      <DashboardScreen activeTab="home" backgroundColor="#F8FAFC">
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={{ paddingBottom: 100, paddingTop: 10 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+            <View style={styles.headerTop}>
+              <View style={styles.headerText}>
+                <Text style={styles.greeting}>Panel Premium</Text>
+                <Text style={styles.subtitle}>
+                  Acá tenés el resumen local de tu negocio.
+                </Text>
+              </View>
+
+              <Pressable style={styles.bellButton} hitSlop={8}>
+                <BellIcon />
+                <View style={styles.bellBadge} />
+              </Pressable>
             </View>
 
-            <Pressable style={styles.bellButton} hitSlop={8}>
-              <BellIcon />
-              <View style={styles.bellBadge} />
-            </Pressable>
-          </View>
-
-          <View style={styles.statsGrid}>
-            {STATS.map((stat) => (
-              <View key={stat.label} style={styles.statCard}>
-                <Text style={[styles.statValue, { color: stat.color }]}>
-                  {stat.value}
-                </Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.body}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Actividad reciente</Text>
-            <Link href={"/history" as Href} asChild>
-              <Pressable hitSlop={8}>
-                <Text style={styles.sectionLink}>Ver todos</Text>
-              </Pressable>
-            </Link>
-          </View>
-
-          <View style={styles.activityList}>
-            {ACTIVITY.map((item) => (
-              <View key={item.id} style={styles.activityItem}>
-                <View style={styles.activityIconWrap}>
-                  <DocumentIcon size={20} />
-                </View>
-
-                <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>
-                    Presupuesto #{item.id}
+            <View style={styles.statsGrid}>
+              {STATS.map((stat) => (
+                <View key={stat.label} style={styles.statCard}>
+                  <Text style={[styles.statValue, { color: stat.color }]}>
+                    {stat.value}
                   </Text>
-                  <Text style={styles.activityClient}>{item.client}</Text>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
                 </View>
-
-                <View style={styles.activityMeta}>
-                  <Text style={styles.activityAmount}>{item.amount}</Text>
-                  <Text style={styles.activityDate}>{item.date}</Text>
-                </View>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </DashboardScreen>
+
+          <View style={styles.body}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Actividad reciente</Text>
+              <Link href={"/history" as Href} asChild>
+                <Pressable hitSlop={8}>
+                  <Text style={styles.sectionLink}>Ver todos</Text>
+                </Pressable>
+              </Link>
+            </View>
+
+            <View style={styles.activityList}>
+              {ACTIVITY.map((item) => (
+                <View key={item.id} style={styles.activityItem}>
+                  <View style={styles.activityIconWrap}>
+                    <DocumentIcon size={20} />
+                  </View>
+
+                  <View style={styles.activityContent}>
+                    <Text style={styles.activityTitle}>
+                      Presupuesto #{item.id}
+                    </Text>
+                    <Text style={styles.activityClient}>{item.client}</Text>
+                  </View>
+
+                  <View style={styles.activityMeta}>
+                    <Text style={styles.activityAmount}>{item.amount}</Text>
+                    <Text style={styles.activityDate}>{item.date}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </DashboardScreen>
+    </PremiumGate>
   );
 }
 
