@@ -63,3 +63,6 @@ export PATH=$JAVA_HOME/bin:$PATH
 npx expo prebuild --platform android
 cd android
 ./gradlew assembleRelease
+
+Para subir al play store
+./gradlew bundleRelease

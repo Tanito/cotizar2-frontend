@@ -6,42 +6,16 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Link, type Href } from "expo-router";
 
 import { BellIcon, DocumentIcon } from "@/components/dashboard-icons";
 import { DashboardScreen } from "@/components/dashboard-screen";
 import { PremiumGate } from "@/components/premium-gate";
-import { Link, type Href } from "expo-router";
-
-const STATS = [
-  { value: "12", label: "Presupuestos este mes", color: "#2563EB" },
-  { value: "$ 1.250.000", label: "Ventas estimadas", color: "#2563EB" },
-  { value: "8", label: "Clientes", color: "#16A34A" },
-  { value: "5", label: "Pendientes", color: "#DC2626" },
-] as const;
-
-const ACTIVITY = [
-  {
-    id: "000123",
-    client: "Juan Pérez",
-    amount: "$ 145.500",
-    date: "24/05/2024",
-  },
-  {
-    id: "000122",
-    client: "María Gómez",
-    amount: "$ 89.200",
-    date: "23/05/2024",
-  },
-  {
-    id: "000121",
-    client: "Lucas Martínez",
-    amount: "$ 210.000",
-    date: "22/05/2024",
-  },
-] as const;
+import { useDashboard } from "@/hooks/useDashboard";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const { stats, recentActivity } = useDashboard();
 
   return (
     <PremiumGate>
@@ -67,7 +41,7 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.statsGrid}>
-              {STATS.map((stat) => (
+              {stats.map((stat) => (
                 <View key={stat.label} style={styles.statCard}>
                   <Text style={[styles.statValue, { color: stat.color }]}>
                     {stat.value}
@@ -89,7 +63,7 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.activityList}>
-              {ACTIVITY.map((item) => (
+              {recentActivity.map((item) => (
                 <View key={item.id} style={styles.activityItem}>
                   <View style={styles.activityIconWrap}>
                     <DocumentIcon size={20} />
@@ -97,7 +71,7 @@ export default function HomeScreen() {
 
                   <View style={styles.activityContent}>
                     <Text style={styles.activityTitle}>
-                      Presupuesto #{item.id}
+                      Presupuesto #{item.quoteNumber}
                     </Text>
                     <Text style={styles.activityClient}>{item.client}</Text>
                   </View>

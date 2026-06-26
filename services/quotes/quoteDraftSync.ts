@@ -64,8 +64,10 @@ function buildQuoteRecord(
 export async function persistCurrentQuoteDraft(
   quote: QuoteDraftSource,
 ): Promise<void> {
-  await quoteRepository.saveQuote(
-    buildQuoteRecord(quote, currentDraftContext?.status ?? "draft"),
+  const status = currentDraftContext?.status ?? "draft";
+
+  await quoteRepository.updateQuote(
+    buildQuoteRecord(quote, status),
   );
 }
 
