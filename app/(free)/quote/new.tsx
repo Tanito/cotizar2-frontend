@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Pressable,
   ScrollView,
@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 
+import { useClientAutocomplete } from "@/hooks/useClientAutocomplete";
 import {
   QuoteMetaErrors,
   QuoteMetaForm,
@@ -20,6 +21,7 @@ import {
   getQuoteExitHref,
   syncQuoteFlowFromParam,
 } from "@/store/quoteFlowStore";
+import { useSubscriptionStore } from "@/store/subscriptionStore";
 
 function Step({ label, active }: { label: string; active?: boolean }) {
   return (
@@ -37,11 +39,13 @@ function Field({
   error,
   multiline,
   style,
+  children,
   ...props
 }: TextInputProps & {
   label: string;
   error?: string;
   multiline?: boolean;
+  children?: ReactNode;
 }) {
   return (
     <View style={styles.field}>
@@ -59,6 +63,7 @@ function Field({
       />
 
       {error ? <Text style={styles.fieldError}>{error}</Text> : null}
+      {children}
     </View>
   );
 }
@@ -66,6 +71,7 @@ function Field({
 export default function NewQuoteScreen() {
   const router = useRouter();
   const { from } = useLocalSearchParams<{ from?: string }>();
+  const isPremium = useSubscriptionStore((state) => state.isPremium);
   const quote = useFreeQuoteStore((state) => state.quote);
   const setQuoteMeta = useFreeQuoteStore((state) => state.setQuoteMeta);
 
@@ -78,6 +84,13 @@ export default function NewQuoteScreen() {
     notes: quote.notes,
   });
   const [errors, setErrors] = useState<QuoteMetaErrors>({});
+  const [isClientSuggestionsOpen, setIsClientSuggestionsOpen] =
+    useState(false);
+
+  const clientSuggestions = useClientAutocomplete(
+    form.customerName,
+    isPremium,
+  );
 
   useEffect(() => {
     syncQuoteFlowFromParam(from);
@@ -99,6 +112,24 @@ export default function NewQuoteScreen() {
         return next;
       });
     }
+  };
+
+  const selectClientSuggestion = (client: {
+    name: string;
+    phone: string;
+  }) => {
+    setForm((prev) => ({
+      ...prev,
+      customerName: client.name,
+      customerPhone: client.phone,
+    }));
+    setIsClientSuggestionsOpen(false);
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.customerName;
+      delete next.customerPhone;
+      return next;
+    });
   };
 
   const onSubmit = () => {
@@ -147,10 +178,33 @@ export default function NewQuoteScreen() {
           <Field
             label="Nombre"
             value={form.customerName}
-            onChangeText={(text) => updateField("customerName", text)}
+            onChangeText={(text) => {
+              setIsClientSuggestionsOpen(true);
+              updateField("customerName", text);
+            }}
             placeholder="Nombre del cliente"
             error={errors.customerName}
-          />
+          >
+            {isPremium &&
+            isClientSuggestionsOpen &&
+            clientSuggestions.length > 0 ? (
+              <View style={styles.suggestionsList}>
+                {clientSuggestions.map((client, index) => (
+                  <Pressable
+                    key={client.id}
+                    style={[
+                      styles.suggestionItem,
+                      index === clientSuggestions.length - 1 &&
+                        styles.suggestionItemLast,
+                    ]}
+                    onPress={() => selectClientSuggestion(client)}
+                  >
+                    <Text style={styles.suggestionText}>{client.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
+          </Field>
 
           <Field
             label="Telefono"
@@ -347,6 +401,32 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14,
     color: "#EF4444",
+  },
+
+  suggestionsList: {
+    marginTop: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",
+  },
+
+  suggestionItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+
+  suggestionItemLast: {
+    borderBottomWidth: 0,
+  },
+
+  suggestionText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0F172A",
   },
 
   footer: {

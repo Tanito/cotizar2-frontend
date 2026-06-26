@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   Pressable,
   ScrollView,
@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 
+import { useCatalogAutocomplete } from "@/hooks/useCatalogAutocomplete";
 import {
   QuoteItemErrors,
   QuoteItemForm,
@@ -17,6 +18,7 @@ import {
 } from "@/lib/utils/freeValidators";
 import { formatARS } from "@/lib/utils/quoteUtils";
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
+import { useSubscriptionStore } from "@/store/subscriptionStore";
 
 const emptyItem: QuoteItemForm = {
   description: "",
@@ -39,10 +41,12 @@ function Field({
   label,
   error,
   style,
+  children,
   ...props
 }: TextInputProps & {
   label: string;
   error?: string;
+  children?: ReactNode;
 }) {
   return (
     <View style={styles.field}>
@@ -55,12 +59,14 @@ function Field({
       />
 
       {error ? <Text style={styles.fieldError}>{error}</Text> : null}
+      {children}
     </View>
   );
 }
 
 export default function QuoteItemsScreen() {
   const router = useRouter();
+  const isPremium = useSubscriptionStore((state) => state.isPremium);
   const items = useFreeQuoteStore((state) => state.quote.items);
   const addItem = useFreeQuoteStore((state) => state.addItem);
   const updateItem = useFreeQuoteStore((state) => state.updateItem);
@@ -70,6 +76,10 @@ export default function QuoteItemsScreen() {
   const [fieldErrors, setFieldErrors] = useState<QuoteItemErrors>({});
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDescriptionSuggestionsOpen, setIsDescriptionSuggestionsOpen] =
+    useState(false);
+
+  const catalogSuggestions = useCatalogAutocomplete(form.description, isPremium);
 
   const itemTotal = useMemo(
     () => form.quantity * form.unitPrice,
@@ -86,6 +96,7 @@ export default function QuoteItemsScreen() {
     setForm(emptyItem);
     setFieldErrors({});
     setEditingItemId(null);
+    setIsDescriptionSuggestionsOpen(false);
   };
 
   const changeQuantity = (delta: number) => {
@@ -131,6 +142,25 @@ export default function QuoteItemsScreen() {
     });
     setFieldErrors({});
     setError(null);
+    setIsDescriptionSuggestionsOpen(false);
+  };
+
+  const selectCatalogSuggestion = (item: {
+    name: string;
+    price: number;
+  }) => {
+    setForm((prev) => ({
+      ...prev,
+      description: item.name,
+      unitPrice: item.price,
+    }));
+    setIsDescriptionSuggestionsOpen(false);
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      delete next.description;
+      delete next.unitPrice;
+      return next;
+    });
   };
 
   const onContinue = () => {
@@ -174,6 +204,7 @@ export default function QuoteItemsScreen() {
             label="Descripcion"
             value={form.description}
             onChangeText={(text) => {
+              setIsDescriptionSuggestionsOpen(true);
               setForm((prev) => ({ ...prev, description: text }));
               if (fieldErrors.description) {
                 setFieldErrors((prev) => {
@@ -185,7 +216,27 @@ export default function QuoteItemsScreen() {
             }}
             placeholder="Ej: Instalacion electrica"
             error={fieldErrors.description}
-          />
+          >
+            {isPremium &&
+            isDescriptionSuggestionsOpen &&
+            catalogSuggestions.length > 0 ? (
+              <View style={styles.suggestionsList}>
+                {catalogSuggestions.map((item, index) => (
+                  <Pressable
+                    key={item.id}
+                    style={[
+                      styles.suggestionItem,
+                      index === catalogSuggestions.length - 1 &&
+                        styles.suggestionItemLast,
+                    ]}
+                    onPress={() => selectCatalogSuggestion(item)}
+                  >
+                    <Text style={styles.suggestionText}>{item.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
+          </Field>
 
           <Text style={styles.fieldLabel}>Cantidad</Text>
           <View style={styles.quantityRow}>
@@ -408,6 +459,32 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14,
     color: "#EF4444",
+  },
+
+  suggestionsList: {
+    marginTop: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",
+  },
+
+  suggestionItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+
+  suggestionItemLast: {
+    borderBottomWidth: 0,
+  },
+
+  suggestionText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0F172A",
   },
 
   quantityRow: {

@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import type { CatalogItem } from "@/lib/models/catalog";
+import { normalizeText } from "@/lib/utils/normalizeText";
 
 type CatalogPayload = {
   items: CatalogItem[];
@@ -8,6 +9,13 @@ type CatalogPayload = {
 
 export interface CatalogRepository {
   getAllItems(): Promise<CatalogItem[]>;
+  searchItems(
+    query: string,
+    options?: {
+      limit?: number;
+      types?: Array<CatalogItem["type"]>;
+    },
+  ): Promise<CatalogItem[]>;
   saveItem(item: CatalogItem): Promise<void>;
   updateItem(item: CatalogItem): Promise<void>;
   deleteItem(id: string): Promise<void>;
@@ -176,10 +184,47 @@ class LocalCatalogRepository implements CatalogRepository {
     await this.writeCache();
   }
 
+  private searchInCache(
+    query: string,
+    options?: {
+      limit?: number;
+      types?: Array<CatalogItem["type"]>;
+    },
+  ): CatalogItem[] {
+    const normalizedQuery = normalizeText(query);
+    const limit = options?.limit ?? 6;
+    const types = options?.types ?? ["product", "service"];
+
+    return sortByName(this.cache ?? [])
+      .filter((item) => types.includes(item.type))
+      .filter((item) => {
+        if (!normalizedQuery) {
+          return true;
+        }
+
+        const haystack = normalizeText(`${item.name} ${item.description ?? ""}`);
+        return haystack.includes(normalizedQuery);
+      })
+      .slice(0, limit);
+  }
+
   async getAllItems(): Promise<CatalogItem[]> {
     return this.enqueue(async () => {
       const items = await this.ensureLoaded();
       return sortByName(items);
+    });
+  }
+
+  async searchItems(
+    query: string,
+    options?: {
+      limit?: number;
+      types?: Array<CatalogItem["type"]>;
+    },
+  ): Promise<CatalogItem[]> {
+    return this.enqueue(async () => {
+      await this.ensureLoaded();
+      return this.searchInCache(query, options);
     });
   }
 
@@ -232,4 +277,3 @@ class LocalCatalogRepository implements CatalogRepository {
 }
 
 export const catalogRepository: CatalogRepository = new LocalCatalogRepository();
-

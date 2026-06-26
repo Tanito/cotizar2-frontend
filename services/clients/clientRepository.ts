@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import type { Client } from "@/lib/models/client";
+import { normalizeText } from "@/lib/utils/normalizeText";
 
 type ClientStoragePayload = {
   clients: Client[];
@@ -8,6 +9,12 @@ type ClientStoragePayload = {
 
 export interface ClientRepository {
   getAllClients(): Promise<Client[]>;
+  searchClients(
+    query: string,
+    options?: {
+      limit?: number;
+    },
+  ): Promise<Client[]>;
   saveClient(client: Client): Promise<void>;
   updateClient(client: Client): Promise<void>;
   deleteClient(id: string): Promise<void>;
@@ -105,10 +112,42 @@ class LocalClientRepository implements ClientRepository {
     await this.writeCache();
   }
 
+  private searchInCache(
+    query: string,
+    options?: {
+      limit?: number;
+    },
+  ): Client[] {
+    const normalizedQuery = normalizeText(query);
+    const limit = options?.limit ?? 5;
+
+    return sortByName(this.cache ?? [])
+      .filter((client) => {
+        if (!normalizedQuery) {
+          return true;
+        }
+
+        return normalizeText(client.name).includes(normalizedQuery);
+      })
+      .slice(0, limit);
+  }
+
   async getAllClients(): Promise<Client[]> {
     return this.enqueue(async () => {
       const clients = await this.ensureLoaded();
       return sortByName(clients);
+    });
+  }
+
+  async searchClients(
+    query: string,
+    options?: {
+      limit?: number;
+    },
+  ): Promise<Client[]> {
+    return this.enqueue(async () => {
+      await this.ensureLoaded();
+      return this.searchInCache(query, options);
     });
   }
 
@@ -142,4 +181,3 @@ class LocalClientRepository implements ClientRepository {
 }
 
 export const clientRepository: ClientRepository = new LocalClientRepository();
-
