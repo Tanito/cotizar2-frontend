@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Pressable,
   ScrollView,
@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import { useClientAutocomplete } from "@/hooks/useClientAutocomplete";
+import { useBusinessProfile } from "@/hooks/useBusinessProfile";
 import {
   QuoteMetaErrors,
   QuoteMetaForm,
@@ -74,6 +75,7 @@ export default function NewQuoteScreen() {
   const isPremium = useSubscriptionStore((state) => state.isPremium);
   const quote = useFreeQuoteStore((state) => state.quote);
   const setQuoteMeta = useFreeQuoteStore((state) => state.setQuoteMeta);
+  const { profile: businessProfile } = useBusinessProfile();
 
   const [form, setForm] = useState<QuoteMetaForm>({
     customerName: quote.customerName,
@@ -86,6 +88,7 @@ export default function NewQuoteScreen() {
   const [errors, setErrors] = useState<QuoteMetaErrors>({});
   const [isClientSuggestionsOpen, setIsClientSuggestionsOpen] =
     useState(false);
+  const hasAutoFilledBusinessType = useRef(false);
 
   const clientSuggestions = useClientAutocomplete(
     form.customerName,
@@ -95,6 +98,20 @@ export default function NewQuoteScreen() {
   useEffect(() => {
     syncQuoteFlowFromParam(from);
   }, [from]);
+
+  useEffect(() => {
+    if (!isPremium || hasAutoFilledBusinessType.current) {
+      return;
+    }
+
+    const nextBusinessType = businessProfile?.businessType.trim() ?? "";
+    if (!nextBusinessType || form.serviceType.trim()) {
+      return;
+    }
+
+    setForm((prev) => ({ ...prev, serviceType: nextBusinessType }));
+    hasAutoFilledBusinessType.current = true;
+  }, [businessProfile?.businessType, form.serviceType, isPremium]);
 
   const onCancel = () => {
     router.replace(getQuoteExitHref());

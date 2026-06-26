@@ -9,9 +9,13 @@ import {
   View,
 } from "react-native";
 
+import { businessProfileRepository } from "@/services/business/businessProfileRepository";
+import { brandingRepository } from "@/services/branding/brandingRepository";
 import { formatARS, getQuoteTotals } from "@/lib/utils/quoteUtils";
 import { generateLocalFreeQuotePdf } from "@/services/pdf/freeQuotePdfService";
+import { generateLocalPremiumQuotePdf } from "@/services/pdf/premiumQuotePdfService";
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
+import { useSubscriptionStore } from "@/store/subscriptionStore";
 
 function Step({ label, active }: { label: string; active?: boolean }) {
   return (
@@ -26,6 +30,7 @@ function Step({ label, active }: { label: string; active?: boolean }) {
 
 export default function QuoteSummaryScreen() {
   const router = useRouter();
+  const isPremium = useSubscriptionStore((state) => state.isPremium);
   const quote = useFreeQuoteStore((state) => state.quote);
   const pdfUrl = useFreeQuoteStore((state) => state.pdfUrl);
   const setPdfResult = useFreeQuoteStore((state) => state.setPdfResult);
@@ -45,7 +50,16 @@ export default function QuoteSummaryScreen() {
   const onGeneratePdf = async () => {
     setIsGenerating(true);
     try {
-      const data = await generateLocalFreeQuotePdf(quote, pdfUrl);
+      const [businessProfile, branding] = isPremium
+        ? await Promise.all([
+            businessProfileRepository.getProfile(),
+            brandingRepository.getBranding(),
+          ])
+        : [null, null];
+
+      const data = isPremium
+        ? await generateLocalPremiumQuotePdf(quote, businessProfile, branding, pdfUrl)
+        : await generateLocalFreeQuotePdf(quote, pdfUrl);
       setPdfResult(data.pdfUri, data.whatsappText);
       router.push("/quote/pdf-preview");
     } finally {
