@@ -2,15 +2,12 @@ import type { ReactNode } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { PremiumUpgradeScreen } from "@/components/premium-upgrade-screen";
-import { useSubscriptionStore } from "@/store/subscriptionStore";
+import { useSubscription } from "@/services/subscription/useSubscription";
 
 export function PremiumGate({ children }: { children: ReactNode }) {
-  const { isLoading, isPremium } = useSubscriptionStore((state) => ({
-    isLoading: state.isLoading,
-    isPremium: state.isPremium,
-  }));
+  const { initialized, isLoading, isPremium } = useSubscription();
 
-  if (isLoading) {
+  if (!initialized || isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2563EB" />

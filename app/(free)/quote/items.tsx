@@ -18,7 +18,7 @@ import {
 } from "@/lib/utils/freeValidators";
 import { formatARS } from "@/lib/utils/quoteUtils";
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
-import { useSubscriptionStore } from "@/store/subscriptionStore";
+import { useSubscription } from "@/services/subscription/useSubscription";
 
 const emptyItem: QuoteItemForm = {
   description: "",
@@ -66,7 +66,7 @@ function Field({
 
 export default function QuoteItemsScreen() {
   const router = useRouter();
-  const isPremium = useSubscriptionStore((state) => state.isPremium);
+  const { isPremium } = useSubscription();
   const items = useFreeQuoteStore((state) => state.quote.items);
   const addItem = useFreeQuoteStore((state) => state.addItem);
   const updateItem = useFreeQuoteStore((state) => state.updateItem);

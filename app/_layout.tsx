@@ -4,17 +4,16 @@ import { useEffect, type ReactNode } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
-import { subscriptionService } from "@/services/subscriptions/subscriptionService";
-import { useSubscriptionStore } from "@/store/subscriptionStore";
+import { useSubscription } from "@/services/subscription/useSubscription";
 
 function SubscriptionBootstrap({ children }: { children: ReactNode }) {
-  const isLoading = useSubscriptionStore((state) => state.isLoading);
+  const { initialized, initializeSubscription } = useSubscription();
 
   useEffect(() => {
-    void subscriptionService.initialize();
-  }, []);
+    void initializeSubscription();
+  }, [initializeSubscription]);
 
-  if (isLoading) {
+  if (!initialized) {
     return null;
   }
 

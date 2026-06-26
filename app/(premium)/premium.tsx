@@ -1,10 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { subscriptionService } from "@/services/subscriptions/subscriptionService";
-import { useSubscriptionStore } from "@/store/subscriptionStore";
+import { useSubscription } from "@/services/subscription/useSubscription";
 
 const PREMIUM_FEATURES = [
   "Sin límites",
@@ -38,10 +37,7 @@ function FeatureList({ items }: { items: readonly string[] }) {
 export default function PremiumPlansScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isPremium, isLoading } = useSubscriptionStore((state) => ({
-    isPremium: state.isPremium,
-    isLoading: state.isLoading,
-  }));
+  const { isPremium, isLoading, restorePurchases } = useSubscription();
 
   return (
     <View style={styles.screen}>
@@ -82,8 +78,19 @@ export default function PremiumPlansScreen() {
 
           <Pressable
             style={styles.planButtonPrimary}
-            onPress={() => {
-              void subscriptionService.restorePurchases();
+            onPress={async () => {
+              try {
+                const result = await restorePurchases();
+                if (result.message.trim()) {
+                  Alert.alert("Compras restauradas", result.message);
+                }
+              } catch (error) {
+                const message =
+                  error instanceof Error && error.message.trim()
+                    ? error.message
+                    : "No fue posible restaurar las compras.\nIntentá nuevamente más tarde.";
+                Alert.alert("No se pudo restaurar", message);
+              }
             }}
           >
             <Text style={styles.planButtonPrimaryText}>

@@ -22,7 +22,7 @@ import {
   getQuoteExitHref,
   syncQuoteFlowFromParam,
 } from "@/store/quoteFlowStore";
-import { useSubscriptionStore } from "@/store/subscriptionStore";
+import { useSubscription } from "@/services/subscription/useSubscription";
 
 function Step({ label, active }: { label: string; active?: boolean }) {
   return (
@@ -72,7 +72,7 @@ function Field({
 export default function NewQuoteScreen() {
   const router = useRouter();
   const { from } = useLocalSearchParams<{ from?: string }>();
-  const isPremium = useSubscriptionStore((state) => state.isPremium);
+  const { isPremium } = useSubscription();
   const quote = useFreeQuoteStore((state) => state.quote);
   const setQuoteMeta = useFreeQuoteStore((state) => state.setQuoteMeta);
   const { profile: businessProfile } = useBusinessProfile();

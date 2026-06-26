@@ -14,8 +14,8 @@ import { brandingRepository } from "@/services/branding/brandingRepository";
 import { formatARS, getQuoteTotals } from "@/lib/utils/quoteUtils";
 import { generateLocalFreeQuotePdf } from "@/services/pdf/freeQuotePdfService";
 import { generateLocalPremiumQuotePdf } from "@/services/pdf/premiumQuotePdfService";
+import { useSubscription } from "@/services/subscription/useSubscription";
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
-import { useSubscriptionStore } from "@/store/subscriptionStore";
 
 function Step({ label, active }: { label: string; active?: boolean }) {
   return (
@@ -30,7 +30,7 @@ function Step({ label, active }: { label: string; active?: boolean }) {
 
 export default function QuoteSummaryScreen() {
   const router = useRouter();
-  const isPremium = useSubscriptionStore((state) => state.isPremium);
+  const { isPremium } = useSubscription();
   const quote = useFreeQuoteStore((state) => state.quote);
   const pdfUrl = useFreeQuoteStore((state) => state.pdfUrl);
   const setPdfResult = useFreeQuoteStore((state) => state.setPdfResult);

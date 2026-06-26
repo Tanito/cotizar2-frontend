@@ -1,11 +1,40 @@
+import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { subscriptionService } from "@/services/subscriptions/subscriptionService";
+import { useSubscription } from "@/services/subscription/useSubscription";
 
 export function PremiumUpgradeScreen() {
+  const { restorePurchases } = useSubscription();
+  const [isRestoring, setIsRestoring] = useState(false);
+
+  const onRestorePurchases = async () => {
+    setIsRestoring(true);
+    try {
+      const result = await restorePurchases();
+      if (result.message.trim()) {
+        Alert.alert("Compras restauradas", result.message);
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message.trim()
+          ? error.message
+          : "No fue posible restaurar las compras.\nIntentá nuevamente más tarde.";
+      Alert.alert("No se pudo restaurar", message);
+    } finally {
+      setIsRestoring(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
+      <Link href="/" asChild>
+        <Pressable style={styles.backButton} hitSlop={8}>
+          <Ionicons name="arrow-back" size={22} color="#0F172A" />
+        </Pressable>
+      </Link>
+
       <View style={styles.card}>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>PREMIUM</Text>
@@ -19,12 +48,13 @@ export function PremiumUpgradeScreen() {
         </Text>
 
         <Pressable
-          style={styles.primaryButton}
-          onPress={() => {
-            void subscriptionService.restorePurchases();
-          }}
+          style={[styles.primaryButton, isRestoring && styles.buttonDisabled]}
+          onPress={() => void onRestorePurchases()}
+          disabled={isRestoring}
         >
-          <Text style={styles.primaryButtonText}>Restaurar compras</Text>
+          <Text style={styles.primaryButtonText}>
+            {isRestoring ? "Restaurando..." : "Restaurar compras"}
+          </Text>
         </Pressable>
 
         <Link href="/premium" asChild>
@@ -44,6 +74,18 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
     backgroundColor: "#F8FAFC",
     justifyContent: "center",
+  },
+  backButton: {
+    alignSelf: "flex-start",
+    width: 40,
+    height: 40,
+    marginBottom: 16,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
   card: {
     borderRadius: 28,
@@ -91,6 +133,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#FFFFFF",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   secondaryButton: {
     marginTop: 12,

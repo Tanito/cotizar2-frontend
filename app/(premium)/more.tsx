@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link, type Href } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ChevronRightIcon } from "@/components/dashboard-icons";
 import { DashboardScreen } from "@/components/dashboard-screen";
 import { PremiumGate } from "@/components/premium-gate";
-import { subscriptionService } from "@/services/subscriptions/subscriptionService";
+import { useSubscription } from "@/services/subscription/useSubscription";
 
 type MenuItem = {
   label: string;
@@ -55,6 +55,7 @@ function MenuRow({ item }: { item: MenuItem }) {
 
 export default function MoreScreen() {
   const insets = useSafeAreaInsets();
+  const { restorePurchases } = useSubscription();
 
   const sections: MenuSection[] = [
     {
@@ -86,8 +87,19 @@ export default function MoreScreen() {
         {
           label: "Restaurar compras",
           icon: "refresh-outline",
-          onPress: () => {
-            void subscriptionService.restorePurchases();
+          onPress: async () => {
+            try {
+              const result = await restorePurchases();
+              if (result.message.trim()) {
+                Alert.alert("Compras restauradas", result.message);
+              }
+            } catch (error) {
+              const message =
+                error instanceof Error && error.message.trim()
+                  ? error.message
+                  : "No fue posible restaurar las compras.\nIntentá nuevamente más tarde.";
+              Alert.alert("No se pudo restaurar", message);
+            }
           },
         },
         { label: "Ver planes", icon: "diamond-outline", href: "/premium" },
