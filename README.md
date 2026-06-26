@@ -54,3 +54,12 @@ vm use 20.20.2
 export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 export PATH=$JAVA_HOME/bin:$PATH
 npx expo start --web
+
+Generar apk
+
+nvm use 20.20.2
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+export PATH=$JAVA_HOME/bin:$PATH
+npx expo prebuild --platform android
+cd android
+./gradlew assembleRelease
