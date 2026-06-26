@@ -1,3 +1,4 @@
+import { Link, type Href } from "expo-router";
 import {
   Pressable,
   ScrollView,
@@ -6,9 +7,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Link, type Href } from "expo-router";
 
-import { BellIcon, DocumentIcon } from "@/components/dashboard-icons";
+import { /* BellIcon,*/ DocumentIcon } from "@/components/dashboard-icons";
 import { DashboardScreen } from "@/components/dashboard-screen";
 import { PremiumGate } from "@/components/premium-gate";
 import { useDashboard } from "@/hooks/useDashboard";
@@ -34,10 +34,10 @@ export default function HomeScreen() {
                 </Text>
               </View>
 
-              <Pressable style={styles.bellButton} hitSlop={8}>
+              {/* <Pressable style={styles.bellButton} hitSlop={8}>
                 <BellIcon />
                 <View style={styles.bellBadge} />
-              </Pressable>
+              </Pressable> */}
             </View>
 
             <View style={styles.statsGrid}>

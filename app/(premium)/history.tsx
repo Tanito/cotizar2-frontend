@@ -11,17 +11,17 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { DocumentIcon } from "@/components/dashboard-icons";
 import { DashboardScreen } from "@/components/dashboard-screen";
-import { DocumentIcon, WhatsAppIcon } from "@/components/dashboard-icons";
 import { PremiumGate } from "@/components/premium-gate";
+import { useQuotes } from "@/hooks/useQuotes";
 import type { QuoteFilter, QuoteSortOrder, QuoteStatus } from "@/lib/models/quote";
 import { formatARS } from "@/lib/utils/quoteUtils";
-import { useQuotes } from "@/hooks/useQuotes";
 
 const FILTER_TABS: { label: string; value: QuoteFilter }[] = [
-  { label: "Todos", value: "all" },
-  { label: "Borradores", value: "draft" },
-  { label: "Enviados", value: "sent" },
+  // { label: "Todos", value: "all" },
+  // { label: "Borradores", value: "draft" },
+  // { label: "Enviados", value: "sent" },
 ];
 
 const SORT_OPTIONS: { label: string; value: QuoteSortOrder }[] = [
@@ -132,7 +132,7 @@ export default function HistoryScreen() {
                 <Text style={styles.rowDate}>{formatDate(item.createdAt)}</Text>
               </View>
 
-              <View style={styles.rowEnd}>
+              {/* <View style={styles.rowEnd}>
                 <View
                   style={[
                     styles.badge,
@@ -155,7 +155,7 @@ export default function HistoryScreen() {
                 ) : (
                   <View style={styles.whatsappPlaceholder} />
                 )}
-              </View>
+              </View> */}
             </View>
           ))}
         </ScrollView>

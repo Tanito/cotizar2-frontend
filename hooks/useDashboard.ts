@@ -141,19 +141,16 @@ export function useDashboard() {
       isQuoteInMonth(quote, previousMonth),
     );
 
-    const currentMonthSentQuotes = currentMonthQuotes.filter(
-      (quote) => quote.status === "sent",
-    );
-
     const uniqueClientsThisMonth = new Set(
       currentMonthQuotes
         .map((quote) => normalizeText(quote.clientName))
         .filter(Boolean),
     );
 
-    const recentActivity = sortQuotesDesc(
-      state.quotes.filter((quote) => quote.status === "sent"),
-    )
+    const sentQuotes = state.quotes.filter((quote) => quote.status === "sent");
+    const recentSource = sentQuotes.length > 0 ? sentQuotes : state.quotes;
+
+    const recentActivity = sortQuotesDesc(recentSource)
       .slice(0, 5)
       .map<DashboardActivity>((quote) => ({
         id: quote.id,
@@ -176,22 +173,24 @@ export function useDashboard() {
     const stats: DashboardStat[] = [
       {
         value: String(currentMonthQuotes.length),
-        label: "Presupuestos este mes",
+        label: "Presupuestos",
         color: "#2563EB",
       },
       {
         value: String(uniqueClientsThisMonth.size),
-        label: "Clientes este mes",
+        label: "Clientes",
         color: "#16A34A",
       },
       {
-        value: String(currentMonthSentQuotes.length),
-        label: "Presupuestos enviados",
+        value: formatARS(
+          currentMonthQuotes.reduce((sum, quote) => sum + quote.total, 0),
+        ),
+        label: "Monto presupuestado",
         color: "#7C3AED",
       },
       {
         value: variation.value,
-        label: "Variación mensual",
+        label: "Vs. mes anterior",
         color: variation.color,
       },
     ];
