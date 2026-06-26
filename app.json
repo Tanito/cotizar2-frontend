@@ -11,11 +11,11 @@
 
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cotizar.app"
+      "bundleIdentifier": "com.evolvere.CotizAR"
     },
 
     "android": {
-      "package": "com.cotizar.app",
+      "package": "com.evolvere.CotizAR",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "adaptiveIcon": {
