@@ -91,7 +91,7 @@ export default function WelcomeScreen() {
             ))}
           </View>
 
-          <View style={styles.premiumCard}>
+          {/* <View style={styles.premiumCard}>
             <View style={styles.premiumBadge}>
               <Text style={styles.premiumBadgeText}>PREMIUM</Text>
             </View>
@@ -107,7 +107,7 @@ export default function WelcomeScreen() {
                 <Text style={styles.premiumButtonText}>Ver Premium</Text>
               </Pressable>
             </Link>
-          </View>
+          </View> */}
 
           <Text style={styles.footer}>
             Tenes ideas?{" "}
