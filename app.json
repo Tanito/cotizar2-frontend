@@ -2,7 +2,7 @@
   "expo": {
     "name": "CotizAR",
     "slug": "cotizar",
-    "version": "1.0.0",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "cotizar",
@@ -16,6 +16,7 @@
 
     "android": {
       "package": "com.evolvere.CotizAR",
+      "versionCode": 5,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "adaptiveIcon": {

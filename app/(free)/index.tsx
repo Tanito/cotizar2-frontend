@@ -1,11 +1,10 @@
 import { Link } from "expo-router";
 import {
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
 
 import { WelcomeTabBar } from "@/components/welcome-tab-bar";
@@ -39,11 +38,11 @@ export default function WelcomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
-          <Image
+          {/* <Image
             source={require("../../assets/images/logo.png")}
             style={styles.logo}
             resizeMode="contain"
-          />
+          /> */}
 
           <Text style={styles.tagline}>
             Presupuestos profesionales para tecnicos y oficios. Sin
