@@ -11,7 +11,15 @@ import {
 
 import { businessProfileRepository } from "@/services/business/businessProfileRepository";
 import { brandingRepository } from "@/services/branding/brandingRepository";
-import { formatARS, getQuoteTotals } from "@/lib/utils/quoteUtils";
+import {
+  formatMoney,
+  getItemCurrency,
+  getQuoteTotalsByCurrency,
+  QUOTE_CURRENCIES,
+  type QuoteCurrency,
+  type QuoteTotals,
+  type QuoteTotalsByCurrency,
+} from "@/lib/utils/quoteUtils";
 import { generateLocalFreeQuotePdf } from "@/services/pdf/freeQuotePdfService";
 import { generateLocalPremiumQuotePdf } from "@/services/pdf/premiumQuotePdfService";
 import { useSubscription } from "@/services/subscription/useSubscription";
@@ -28,6 +36,35 @@ function Step({ label, active }: { label: string; active?: boolean }) {
   );
 }
 
+function CurrencyTotalValues({
+  totals,
+  field,
+  large = false,
+}: {
+  totals: QuoteTotalsByCurrency;
+  field: keyof QuoteTotals;
+  large?: boolean;
+}) {
+  const activeCurrencies = QUOTE_CURRENCIES.filter(
+    (currency) => totals[currency].total !== 0,
+  );
+  const currencies: readonly QuoteCurrency[] =
+    activeCurrencies.length > 0 ? activeCurrencies : ["ARS"];
+
+  return (
+    <View style={styles.totalValues}>
+      {currencies.map((currency) => (
+        <Text
+          key={currency}
+          style={large ? styles.totalFinalValue : styles.totalRowValue}
+        >
+          {formatMoney(totals[currency][field], currency)}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
 export default function QuoteSummaryScreen() {
   const router = useRouter();
   const { isPremium } = useSubscription();
@@ -37,7 +74,7 @@ export default function QuoteSummaryScreen() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const totals = useMemo(
-    () => getQuoteTotals(quote.items, quote.depositPercentage),
+    () => getQuoteTotalsByCurrency(quote.items, quote.depositPercentage),
     [quote.items, quote.depositPercentage],
   );
 
@@ -129,12 +166,16 @@ export default function QuoteSummaryScreen() {
               <View style={styles.itemInfo}>
                 <Text style={styles.itemDescription}>{item.description}</Text>
                 <Text style={styles.itemMeta}>
-                  {item.quantity} x {formatARS(item.unitPrice)}
+                  {item.quantity} x{" "}
+                  {formatMoney(item.unitPrice, getItemCurrency(item))}
                 </Text>
               </View>
 
               <Text style={styles.itemTotal}>
-                {formatARS(item.quantity * item.unitPrice)}
+                {formatMoney(
+                  item.quantity * item.unitPrice,
+                  getItemCurrency(item),
+                )}
               </Text>
             </View>
           ))}
@@ -143,20 +184,18 @@ export default function QuoteSummaryScreen() {
         <View style={[styles.totalCard, styles.cardSpaced]}>
           <View style={styles.totalRow}>
             <Text style={styles.totalRowLabel}>Subtotal</Text>
-            <Text style={styles.totalRowValue}>{formatARS(totals.subtotal)}</Text>
+            <CurrencyTotalValues totals={totals} field="subtotal" />
           </View>
 
           <View style={styles.totalRowSpaced}>
             <Text style={styles.totalRowLabel}>Seña sugerida</Text>
-            <Text style={styles.totalRowValue}>
-              {formatARS(totals.depositAmount)}
-            </Text>
+            <CurrencyTotalValues totals={totals} field="depositAmount" />
           </View>
 
           <View style={styles.totalFooter}>
             <View style={styles.totalRow}>
               <Text style={styles.totalFinalLabel}>Total</Text>
-              <Text style={styles.totalFinalValue}>{formatARS(totals.total)}</Text>
+              <CurrencyTotalValues totals={totals} field="total" large />
             </View>
           </View>
         </View>
@@ -384,6 +423,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#FFFFFF",
+    textAlign: "right",
+  },
+
+  totalValues: {
+    flexShrink: 1,
+    alignItems: "flex-end",
+    gap: 4,
   },
 
   totalFooter: {
@@ -400,9 +446,10 @@ const styles = StyleSheet.create({
   },
 
   totalFinalValue: {
-    fontSize: 42,
+    fontSize: 34,
     fontWeight: "800",
     color: "#FFFFFF",
+    textAlign: "right",
   },
 
   footer: {

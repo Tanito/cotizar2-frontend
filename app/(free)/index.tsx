@@ -51,7 +51,7 @@ export default function WelcomeScreen() {
 
           <View style={styles.heroCard}>
             <View style={styles.heroBadge}>
-              <Text style={styles.heroBadgeText}>FREE • SIN CUENTA</Text>
+              <Text style={styles.heroBadgeText}>PERSONAL • PREMIUM HABILITADO</Text>
             </View>
 
             <Text style={styles.heroTitle}>
@@ -64,14 +64,14 @@ export default function WelcomeScreen() {
               Arma un PDF profesional y compartilo directo por WhatsApp.
             </Text>
 
-            <Link href="/quote/new?from=free" asChild>
+            <Link href="/quote/new?from=premium" asChild>
               <Pressable style={styles.heroButton}>
                 <Text style={styles.heroButtonText}>+ Nuevo presupuesto</Text>
               </Pressable>
             </Link>
           </View>
 
-          <Text style={styles.sectionTitle}>¿Que podes hacer gratis?</Text>
+          <Text style={styles.sectionTitle}>Todo listo para usar</Text>
 
           <View style={styles.featuresList}>
             {FEATURES.map((feature) => (

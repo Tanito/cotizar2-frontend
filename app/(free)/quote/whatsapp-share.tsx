@@ -103,7 +103,7 @@ export default function WhatsappShareScreen() {
           style={styles.ghostButton}
           onPress={() => {
             resetFlow();
-            router.replace("/");
+            router.replace("/quote/new?from=premium");
           }}
         >
           <Text style={styles.ghostButtonText}>Nueva cotizacion</Text>

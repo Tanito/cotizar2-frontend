@@ -15,8 +15,11 @@ import { DocumentIcon } from "@/components/dashboard-icons";
 import { DashboardScreen } from "@/components/dashboard-screen";
 import { PremiumGate } from "@/components/premium-gate";
 import { useQuotes } from "@/hooks/useQuotes";
-import type { QuoteFilter, QuoteSortOrder, QuoteStatus } from "@/lib/models/quote";
-import { formatARS } from "@/lib/utils/quoteUtils";
+import type { QuoteFilter, QuoteSortOrder } from "@/lib/models/quote";
+import {
+  formatCurrencyAmounts,
+  getStoredQuoteCurrencyAmounts,
+} from "@/lib/utils/quoteUtils";
 
 const FILTER_TABS: { label: string; value: QuoteFilter }[] = [
   // { label: "Todos", value: "all" },
@@ -28,11 +31,6 @@ const SORT_OPTIONS: { label: string; value: QuoteSortOrder }[] = [
   { label: "Fecha descendente", value: "desc" },
   { label: "Fecha ascendente", value: "asc" },
 ];
-
-const STATUS_STYLES: Record<QuoteStatus, { text: string; bg: string }> = {
-  draft: { text: "#6B7280", bg: "#F3F4F6" },
-  sent: { text: "#16A34A", bg: "#DCFCE7" },
-};
 
 function formatDate(value: string): string {
   const date = new Date(value);
@@ -128,7 +126,12 @@ export default function HistoryScreen() {
               </View>
 
               <View style={styles.rowCenter}>
-                <Text style={styles.rowAmount}>{formatARS(item.total)}</Text>
+                <Text style={styles.rowAmount}>
+                  {formatCurrencyAmounts(
+                    getStoredQuoteCurrencyAmounts(item),
+                    "\n",
+                  )}
+                </Text>
                 <Text style={styles.rowDate}>{formatDate(item.createdAt)}</Text>
               </View>
 

@@ -1,9 +1,7 @@
 import { useSyncExternalStore } from "react";
 
-import { revenueCatSubscriptionService } from "./revenueCatSubscriptionService";
 import type {
   SubscriptionActionResult,
-  SubscriptionSnapshot,
   SubscriptionState,
 } from "./subscription.types";
 
@@ -15,9 +13,9 @@ type SubscriptionStore = SubscriptionState & {
 };
 
 let state: SubscriptionState = {
-  isPremium: false,
-  isLoading: true,
-  initialized: false,
+  isPremium: true,
+  isLoading: false,
+  initialized: true,
   error: null,
 };
 
@@ -41,77 +39,29 @@ function getSnapshot() {
   return state;
 }
 
-function applySnapshot(snapshot: SubscriptionSnapshot) {
-  setState(snapshot);
-}
-
 async function initializeSubscription(): Promise<void> {
-  setState({ isLoading: true, error: null });
-  const snapshot = await revenueCatSubscriptionService.initialize();
-  applySnapshot(snapshot);
+  setState({
+    isPremium: true,
+    isLoading: false,
+    initialized: true,
+    error: null,
+  });
 }
 
 async function refreshSubscription(): Promise<void> {
-  setState({ isLoading: true, error: null });
-
-  try {
-    const snapshot = await revenueCatSubscriptionService.refreshSubscription();
-    applySnapshot(snapshot);
-  } catch (error) {
-    setState({
-      isLoading: false,
-      initialized: true,
-      isPremium: state.isPremium,
-      error:
-        error instanceof Error && error.message.trim()
-          ? error.message
-          : "No se pudo actualizar el estado de la suscripción.",
-    });
-  }
+  await initializeSubscription();
 }
 
 async function purchasePremium(): Promise<SubscriptionActionResult> {
-  setState({ isLoading: true, error: null });
-
-  try {
-    const result = await revenueCatSubscriptionService.purchasePremium();
-    setState({
-      isLoading: false,
-      initialized: true,
-      isPremium: result.isPremium,
-      error: null,
-    });
-    return result;
-  } catch (error) {
-    const message =
-      error instanceof Error && error.message.trim()
-        ? error.message
-        : "No se pudo completar la compra.";
-    setState({ isLoading: false, initialized: true, error: message });
-    throw new Error(message);
-  }
+  await initializeSubscription();
+  return {
+    isPremium: true,
+    message: "Premium está habilitado en esta versión personal.",
+  };
 }
 
 async function restorePurchases(): Promise<SubscriptionActionResult> {
-  setState({ isLoading: true, error: null });
-
-  try {
-    const result = await revenueCatSubscriptionService.restorePurchases();
-    setState({
-      isLoading: false,
-      initialized: true,
-      isPremium: result.isPremium,
-      error: null,
-    });
-    return result;
-  } catch (error) {
-    const message =
-      error instanceof Error && error.message.trim()
-        ? error.message
-        : "No fue posible restaurar las compras.\nIntentá nuevamente más tarde.";
-    setState({ isLoading: false, initialized: true, error: message });
-    throw new Error(message);
-  }
+  return purchasePremium();
 }
 
 export const subscriptionStore = {

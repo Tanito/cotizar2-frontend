@@ -14,6 +14,7 @@ import {
   shareQuotePdf,
 } from "@/services/pdf/shareQuotePdf";
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
+import { getQuoteExitHref } from "@/store/quoteFlowStore";
 
 export default function QuotePdfPreviewScreen() {
   const router = useRouter();
@@ -78,7 +79,10 @@ export default function QuotePdfPreviewScreen() {
           <Text style={styles.secondaryButtonText}>Abrir WhatsApp con mensaje</Text>
         </Pressable>
 
-        <Pressable style={styles.homeButton} onPress={() => router.replace("/")}>
+        <Pressable
+          style={styles.homeButton}
+          onPress={() => router.replace(getQuoteExitHref())}
+        >
           <Text style={styles.homeButtonText}>Volver al inicio</Text>
         </Pressable>
       </View>

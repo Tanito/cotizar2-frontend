@@ -1,4 +1,12 @@
-import { formatARS, type QuoteTotals } from "@/lib/utils/quoteUtils";
+import {
+  formatCurrencyAmounts,
+  formatMoney,
+  getItemCurrency,
+  QUOTE_CURRENCIES,
+  type QuoteCurrency,
+  type QuoteTotals,
+  type QuoteTotalsByCurrency,
+} from "@/lib/utils/quoteUtils";
 import type { FreeQuote } from "@/store/freeQuoteStore";
 
 /** Colores del mockup */
@@ -26,13 +34,23 @@ function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function formatPdfMoney(amount: number): string {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+function formatPdfMoney(amount: number, currency: QuoteCurrency): string {
+  return formatMoney(amount, currency, 2);
+}
+
+function formatPdfTotals(
+  totals: QuoteTotalsByCurrency,
+  key: keyof QuoteTotals,
+): string {
+  const activeCurrencies = QUOTE_CURRENCIES.filter(
+    (currency) => totals[currency].total !== 0,
+  );
+  const currencies: readonly QuoteCurrency[] =
+    activeCurrencies.length > 0 ? activeCurrencies : ["ARS"];
+
+  return currencies
+    .map((currency) => formatPdfMoney(totals[currency][key], currency))
+    .join("<br />");
 }
 
 function formatPdfDate(date: Date): string {
@@ -86,7 +104,7 @@ function spacer(h = 16): string {
 
 export function buildFreeQuotePdfHtml(
   quote: FreeQuote,
-  totals: QuoteTotals,
+  totals: QuoteTotalsByCurrency,
 ): string {
   const num = buildQuoteNumber();
   const rubro = escapeHtml(quote.serviceType.trim() || "Servicio").toUpperCase();
@@ -100,13 +118,14 @@ export function buildFreeQuotePdfHtml(
   const filas = quote.items
     .map((item, i) => {
       const total = item.quantity * item.unitPrice;
+      const currency = getItemCurrency(item);
       const bg = i % 2 === 1 ? C.stripe : C.white;
       return `
         <tr>
           <td bgcolor="${bg}" style="padding:12px 10px;background-color:${bg};border-top:1px solid ${C.border};border-right:1px solid ${C.border};color:${C.navy};font-size:13px;font-weight:600;">${escapeHtml(item.description)}</td>
           <td bgcolor="${bg}" align="center" style="padding:12px 8px;background-color:${bg};border-top:1px solid ${C.border};border-right:1px solid ${C.border};color:${C.navy};font-size:13px;">${item.quantity}</td>
-          <td bgcolor="${bg}" align="right" style="padding:12px 10px;background-color:${bg};border-top:1px solid ${C.border};border-right:1px solid ${C.border};color:${C.navy};font-size:13px;">${formatPdfMoney(item.unitPrice)}</td>
-          <td bgcolor="${bg}" align="right" style="padding:12px 10px;background-color:${bg};border-top:1px solid ${C.border};color:${C.navy};font-size:13px;font-weight:800;">${formatPdfMoney(total)}</td>
+          <td bgcolor="${bg}" align="right" style="padding:12px 10px;background-color:${bg};border-top:1px solid ${C.border};border-right:1px solid ${C.border};color:${C.navy};font-size:13px;">${formatPdfMoney(item.unitPrice, currency)}</td>
+          <td bgcolor="${bg}" align="right" style="padding:12px 10px;background-color:${bg};border-top:1px solid ${C.border};color:${C.navy};font-size:13px;font-weight:800;">${formatPdfMoney(total, currency)}</td>
         </tr>`;
     })
     .join("");
@@ -256,7 +275,7 @@ export function buildFreeQuotePdfHtml(
                           <table cellpadding="0" cellspacing="0" role="presentation">
                             <tr>
                               <td bgcolor="${C.pill}" style="background-color:${C.pill};color:${C.navy};font-size:14px;font-weight:800;padding:6px 16px;border-radius:20px;">
-                                ${formatPdfMoney(totals.depositAmount)}
+                                ${formatPdfTotals(totals, "depositAmount")}
                               </td>
                             </tr>
                           </table>
@@ -277,7 +296,7 @@ export function buildFreeQuotePdfHtml(
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td valign="middle" style="font-size:26px;font-weight:800;color:${C.royal};">TOTAL</td>
-                        <td valign="middle" align="right" style="font-size:26px;font-weight:800;color:${C.navy};">${formatPdfMoney(totals.total)}</td>
+                        <td valign="middle" align="right" style="font-size:22px;font-weight:800;color:${C.navy};line-height:1.35;">${formatPdfTotals(totals, "total")}</td>
                       </tr>
                     </table>
                   </td>
@@ -348,7 +367,7 @@ export const QUOTE_PDF_PRINT_HEIGHT = PAGE_H;
 
 export function buildWhatsappQuoteText(
   quote: FreeQuote,
-  totals: QuoteTotals,
+  totals: QuoteTotalsByCurrency,
 ): string {
   const lines = [
     `Presupuesto - ${quote.customerName}`,
@@ -357,12 +376,12 @@ export function buildWhatsappQuoteText(
     "",
     ...quote.items.map(
       (item) =>
-        `- ${item.description}: ${item.quantity} x ${formatARS(item.unitPrice)} = ${formatARS(item.quantity * item.unitPrice)}`,
+        `- ${item.description}: ${item.quantity} x ${formatMoney(item.unitPrice, getItemCurrency(item))} = ${formatMoney(item.quantity * item.unitPrice, getItemCurrency(item))}`,
     ),
     "",
-    `Subtotal: ${formatARS(totals.subtotal)}`,
-    `Seña sugerida (${quote.depositPercentage}%): ${formatARS(totals.depositAmount)}`,
-    `Total: ${formatARS(totals.total)}`,
+    `Subtotal: ${formatCurrencyAmounts({ ARS: totals.ARS.subtotal, USD: totals.USD.subtotal })}`,
+    `Seña sugerida (${quote.depositPercentage}%): ${formatCurrencyAmounts({ ARS: totals.ARS.depositAmount, USD: totals.USD.depositAmount })}`,
+    `Total: ${formatCurrencyAmounts({ ARS: totals.ARS.total, USD: totals.USD.total })}`,
     `Validez: ${quote.validityDays} días`,
     quote.notes ? `Notas: ${quote.notes}` : null,
   ].filter(Boolean) as string[];

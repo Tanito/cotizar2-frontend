@@ -1,5 +1,3 @@
-import "react-native-reanimated";
-
 import { useEffect, type ReactNode } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";

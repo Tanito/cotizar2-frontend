@@ -1,8 +1,15 @@
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 
 import type { BusinessProfile } from "@/lib/models/businessProfile";
 import type { BrandingSettings } from "@/lib/models/branding";
-import { formatARS, type QuoteTotals } from "@/lib/utils/quoteUtils";
+import {
+  formatMoney,
+  getItemCurrency,
+  QUOTE_CURRENCIES,
+  type QuoteCurrency,
+  type QuoteTotals,
+  type QuoteTotalsByCurrency,
+} from "@/lib/utils/quoteUtils";
 import type { FreeQuote } from "@/store/freeQuoteStore";
 
 const C = {
@@ -33,13 +40,23 @@ function cleanText(value?: string | null): string {
   return value?.trim() ?? "";
 }
 
-function formatPdfMoney(amount: number): string {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+function formatPdfMoney(amount: number, currency: QuoteCurrency): string {
+  return formatMoney(amount, currency, 2);
+}
+
+function formatPdfTotals(
+  totals: QuoteTotalsByCurrency,
+  key: keyof QuoteTotals,
+): string {
+  const activeCurrencies = QUOTE_CURRENCIES.filter(
+    (currency) => totals[currency].total !== 0,
+  );
+  const currencies: readonly QuoteCurrency[] =
+    activeCurrencies.length > 0 ? activeCurrencies : ["ARS"];
+
+  return currencies
+    .map((currency) => formatPdfMoney(totals[currency][key], currency))
+    .join("<br />");
 }
 
 function formatPdfDate(date: Date): string {
@@ -229,7 +246,7 @@ function buildHeaderHtml(
 
 export async function buildPremiumQuotePdfHtml(
   quote: FreeQuote,
-  totals: QuoteTotals,
+  totals: QuoteTotalsByCurrency,
   businessProfile: BusinessProfile | null,
   branding: BrandingSettings | null,
 ): Promise<string> {
@@ -243,13 +260,14 @@ export async function buildPremiumQuotePdfHtml(
   const filas = quote.items
     .map((item, i) => {
       const total = item.quantity * item.unitPrice;
+      const currency = getItemCurrency(item);
       const bg = i % 2 === 1 ? C.stripe : C.white;
       return `
         <tr>
           <td bgcolor="${bg}" style="padding:12px 10px;background-color:${bg};border-top:1px solid ${C.border};border-right:1px solid ${C.border};color:${C.navy};font-size:13px;font-weight:600;">${escapeHtml(item.description)}</td>
           <td bgcolor="${bg}" align="center" style="padding:12px 8px;background-color:${bg};border-top:1px solid ${C.border};border-right:1px solid ${C.border};color:${C.navy};font-size:13px;">${item.quantity}</td>
-          <td bgcolor="${bg}" align="right" style="padding:12px 10px;background-color:${bg};border-top:1px solid ${C.border};border-right:1px solid ${C.border};color:${C.navy};font-size:13px;">${formatPdfMoney(item.unitPrice)}</td>
-          <td bgcolor="${bg}" align="right" style="padding:12px 10px;background-color:${bg};border-top:1px solid ${C.border};color:${C.navy};font-size:13px;font-weight:800;">${formatPdfMoney(total)}</td>
+          <td bgcolor="${bg}" align="right" style="padding:12px 10px;background-color:${bg};border-top:1px solid ${C.border};border-right:1px solid ${C.border};color:${C.navy};font-size:13px;">${formatPdfMoney(item.unitPrice, currency)}</td>
+          <td bgcolor="${bg}" align="right" style="padding:12px 10px;background-color:${bg};border-top:1px solid ${C.border};color:${C.navy};font-size:13px;font-weight:800;">${formatPdfMoney(total, currency)}</td>
         </tr>`;
     })
     .join("");
@@ -391,7 +409,7 @@ export async function buildPremiumQuotePdfHtml(
                           <table cellpadding="0" cellspacing="0" role="presentation">
                             <tr>
                               <td bgcolor="${C.pill}" style="background-color:${C.pill};color:${C.navy};font-size:14px;font-weight:800;padding:6px 16px;border-radius:20px;">
-                                ${formatPdfMoney(totals.depositAmount)}
+                                ${formatPdfTotals(totals, "depositAmount")}
                               </td>
                             </tr>
                           </table>
@@ -411,7 +429,7 @@ export async function buildPremiumQuotePdfHtml(
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td valign="middle" style="font-size:26px;font-weight:800;color:${C.royal};">TOTAL</td>
-                        <td valign="middle" align="right" style="font-size:26px;font-weight:800;color:${C.navy};">${formatPdfMoney(totals.total)}</td>
+                        <td valign="middle" align="right" style="font-size:22px;font-weight:800;color:${C.navy};line-height:1.35;">${formatPdfTotals(totals, "total")}</td>
                       </tr>
                     </table>
                   </td>

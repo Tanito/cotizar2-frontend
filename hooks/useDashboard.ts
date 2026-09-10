@@ -3,7 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import type { Client } from "@/lib/models/client";
 import type { Quote } from "@/lib/models/quote";
 import { normalizeText } from "@/lib/utils/normalizeText";
-import { formatARS } from "@/lib/utils/quoteUtils";
+import {
+  formatCurrencyAmounts,
+  getStoredQuoteCurrencyAmounts,
+} from "@/lib/utils/quoteUtils";
 import { clientRepository } from "@/services/clients/clientRepository";
 import { quoteRepository } from "@/services/quotes/quoteRepository";
 
@@ -157,7 +160,10 @@ export function useDashboard() {
         quoteNumber: quote.quoteNumber,
         client:
           clientNameLookup[normalizeText(quote.clientName)] || quote.clientName,
-        amount: formatARS(quote.total),
+        amount: formatCurrencyAmounts(
+          getStoredQuoteCurrencyAmounts(quote),
+          "\n",
+        ),
         date: new Intl.DateTimeFormat("es-AR", {
           day: "2-digit",
           month: "2-digit",
@@ -182,8 +188,18 @@ export function useDashboard() {
         color: "#16A34A",
       },
       {
-        value: formatARS(
-          currentMonthQuotes.reduce((sum, quote) => sum + quote.total, 0),
+        value: formatCurrencyAmounts(
+          currentMonthQuotes.reduce(
+            (sum, quote) => {
+              const amounts = getStoredQuoteCurrencyAmounts(quote);
+              return {
+                ARS: sum.ARS + amounts.ARS,
+                USD: sum.USD + amounts.USD,
+              };
+            },
+            { ARS: 0, USD: 0 },
+          ),
+          "\n",
         ),
         label: "Monto presupuestado",
         color: "#7C3AED",

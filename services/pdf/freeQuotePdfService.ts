@@ -1,6 +1,6 @@
 import * as Print from "expo-print";
 
-import { getQuoteTotals } from "@/lib/utils/quoteUtils";
+import { getQuoteTotalsByCurrency } from "@/lib/utils/quoteUtils";
 import type { FreeQuote } from "@/store/freeQuoteStore";
 
 import {
@@ -20,7 +20,7 @@ export async function generateLocalFreeQuotePdf(
   quote: FreeQuote,
   _existingPdfUrl?: string | null,
 ): Promise<GeneratedQuotePdf> {
-  const totals = getQuoteTotals(quote.items, quote.depositPercentage);
+  const totals = getQuoteTotalsByCurrency(quote.items, quote.depositPercentage);
   const html = buildFreeQuotePdfHtml(quote, totals);
 
   const { uri } = await Print.printToFileAsync({

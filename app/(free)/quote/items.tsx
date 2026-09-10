@@ -16,15 +16,26 @@ import {
   QuoteItemForm,
   validateQuoteItem,
 } from "@/lib/utils/freeValidators";
-import { formatARS } from "@/lib/utils/quoteUtils";
+import {
+  formatCurrencyAmounts,
+  formatMoney,
+  getItemCurrency,
+  getQuoteTotalsByCurrency,
+  getTotalAmounts,
+  QUOTE_CURRENCIES,
+  type QuoteCurrency,
+} from "@/lib/utils/quoteUtils";
 import { useFreeQuoteStore } from "@/store/freeQuoteStore";
 import { useSubscription } from "@/services/subscription/useSubscription";
 
-const emptyItem: QuoteItemForm = {
-  description: "",
-  quantity: 1,
-  unitPrice: 0,
-};
+function createEmptyItem(currency: QuoteCurrency = "ARS"): QuoteItemForm {
+  return {
+    description: "",
+    quantity: 1,
+    unitPrice: 0,
+    currency,
+  };
+}
 
 function Step({ label, active }: { label: string; active?: boolean }) {
   return (
@@ -72,7 +83,10 @@ export default function QuoteItemsScreen() {
   const updateItem = useFreeQuoteStore((state) => state.updateItem);
   const removeItem = useFreeQuoteStore((state) => state.removeItem);
 
-  const [form, setForm] = useState<QuoteItemForm>(emptyItem);
+  const [form, setForm] = useState<QuoteItemForm>(() =>
+    createEmptyItem(getItemCurrency(items.at(-1) ?? {})),
+  );
+  const [unitPriceInput, setUnitPriceInput] = useState("");
   const [fieldErrors, setFieldErrors] = useState<QuoteItemErrors>({});
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -86,14 +100,14 @@ export default function QuoteItemsScreen() {
     [form.quantity, form.unitPrice],
   );
 
-  const subtotal = useMemo(
-    () =>
-      items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0),
-    [items],
-  );
+  const subtotal = useMemo(() => {
+    const totals = getQuoteTotalsByCurrency(items, 0);
+    return getTotalAmounts(totals);
+  }, [items]);
 
-  const resetForm = () => {
-    setForm(emptyItem);
+  const resetForm = (currency = form.currency) => {
+    setForm(createEmptyItem(currency));
+    setUnitPriceInput("");
     setFieldErrors({});
     setEditingItemId(null);
     setIsDescriptionSuggestionsOpen(false);
@@ -126,7 +140,7 @@ export default function QuoteItemsScreen() {
       addItem(form);
     }
 
-    resetForm();
+    resetForm(form.currency);
     setError(null);
   };
 
@@ -139,7 +153,9 @@ export default function QuoteItemsScreen() {
       description: item.description,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
+      currency: getItemCurrency(item),
     });
+    setUnitPriceInput(String(item.unitPrice).replace(".", ","));
     setFieldErrors({});
     setError(null);
     setIsDescriptionSuggestionsOpen(false);
@@ -154,6 +170,7 @@ export default function QuoteItemsScreen() {
       description: item.name,
       unitPrice: item.price,
     }));
+    setUnitPriceInput(String(item.price).replace(".", ","));
     setIsDescriptionSuggestionsOpen(false);
     setFieldErrors((prev) => {
       const next = { ...prev };
@@ -262,11 +279,16 @@ export default function QuoteItemsScreen() {
 
           <Field
             label="Precio unitario"
-            value={form.unitPrice ? String(form.unitPrice) : ""}
+            value={unitPriceInput}
             onChangeText={(text) => {
+              const sanitized = text
+                .replace(".", ",")
+                .replace(/[^\d,]/g, "")
+                .replace(/(,.*),/g, "$1");
+              setUnitPriceInput(sanitized);
               setForm((prev) => ({
                 ...prev,
-                unitPrice: Number(text.replace(/\D/g, "")) || 0,
+                unitPrice: Number(sanitized.replace(",", ".")) || 0,
               }));
               if (fieldErrors.unitPrice) {
                 setFieldErrors((prev) => {
@@ -276,13 +298,43 @@ export default function QuoteItemsScreen() {
                 });
               }
             }}
-            keyboardType="number-pad"
+            keyboardType="decimal-pad"
             error={fieldErrors.unitPrice}
           />
 
+          <Text style={styles.fieldLabel}>Moneda</Text>
+          <View style={styles.currencySelector}>
+            {QUOTE_CURRENCIES.map((currency) => {
+              const selected = form.currency === currency;
+              return (
+                <Pressable
+                  key={currency}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  style={[
+                    styles.currencyOption,
+                    selected && styles.currencyOptionSelected,
+                  ]}
+                  onPress={() => setForm((prev) => ({ ...prev, currency }))}
+                >
+                  <Text
+                    style={[
+                      styles.currencyOptionText,
+                      selected && styles.currencyOptionTextSelected,
+                    ]}
+                  >
+                    {currency === "ARS" ? "ARS ($)" : "USD (u$s)"}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
           <View style={styles.itemTotalCard}>
             <Text style={styles.itemTotalLabel}>Total del item</Text>
-            <Text style={styles.itemTotalValue}>{formatARS(itemTotal)}</Text>
+            <Text style={styles.itemTotalValue}>
+              {formatMoney(itemTotal, form.currency)}
+            </Text>
           </View>
 
           <Pressable style={styles.saveButton} onPress={onSaveItem}>
@@ -297,12 +349,15 @@ export default function QuoteItemsScreen() {
             <View key={item.id} style={styles.itemCard}>
               <Text style={styles.itemDescription}>{item.description}</Text>
               <Text style={styles.itemMeta}>
-                {item.quantity} x {formatARS(item.unitPrice)}
+                {item.quantity} x {formatMoney(item.unitPrice, getItemCurrency(item))}
               </Text>
 
               <View style={styles.itemFooter}>
                 <Text style={styles.itemTotal}>
-                  {formatARS(item.quantity * item.unitPrice)}
+                  {formatMoney(
+                    item.quantity * item.unitPrice,
+                    getItemCurrency(item),
+                  )}
                 </Text>
 
                 <View style={styles.itemActions}>
@@ -324,7 +379,9 @@ export default function QuoteItemsScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.footerLabel}>Subtotal actual</Text>
-        <Text style={styles.footerSubtotal}>{formatARS(subtotal)}</Text>
+        <Text style={styles.footerSubtotal}>
+          {formatCurrencyAmounts(subtotal, "\n")}
+        </Text>
 
         <Pressable style={styles.continueButton} onPress={onContinue}>
           <Text style={styles.continueButtonText}>Continuar a resumen</Text>
@@ -453,6 +510,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     fontSize: 18,
     color: "#0F172A",
+  },
+
+  currencySelector: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 20,
+  },
+
+  currencyOption: {
+    flex: 1,
+    height: 52,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    backgroundColor: "#F8FAFC",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  currencyOptionSelected: {
+    borderColor: "#2563EB",
+    backgroundColor: "#EFF6FF",
+  },
+
+  currencyOptionText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#64748B",
+  },
+
+  currencyOptionTextSelected: {
+    color: "#2563EB",
   },
 
   fieldError: {

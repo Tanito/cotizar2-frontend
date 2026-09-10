@@ -1,12 +1,16 @@
 import { createUuid } from "@/lib/utils/createUuid";
-import { getQuoteTotals } from "@/lib/utils/quoteUtils";
+import {
+  getQuoteTotalsByCurrency,
+  getTotalAmounts,
+  type QuoteCurrency,
+} from "@/lib/utils/quoteUtils";
 
 import type { Quote, QuoteStatus } from "@/lib/models/quote";
 import { quoteRepository } from "./quoteRepository";
 
 type QuoteDraftSource = {
   customerName: string;
-  items: { quantity: number; unitPrice: number }[];
+  items: { quantity: number; unitPrice: number; currency?: QuoteCurrency }[];
   depositPercentage: number;
 };
 
@@ -44,7 +48,8 @@ function buildQuoteRecord(
   status: QuoteStatus,
 ): Quote {
   const context = getDraftContext();
-  const totals = getQuoteTotals(quote.items, quote.depositPercentage);
+  const totals = getQuoteTotalsByCurrency(quote.items, quote.depositPercentage);
+  const currencyTotals = getTotalAmounts(totals);
 
   currentDraftContext = {
     ...context,
@@ -55,7 +60,8 @@ function buildQuoteRecord(
     id: context.id,
     quoteNumber: context.quoteNumber,
     clientName: quote.customerName.trim(),
-    total: totals.total,
+    total: currencyTotals.ARS,
+    currencyTotals,
     createdAt: context.createdAt,
     status,
   };
@@ -80,4 +86,3 @@ export async function markCurrentQuoteAsSent(
 export function resetCurrentQuoteDraftContext(): void {
   currentDraftContext = null;
 }
-

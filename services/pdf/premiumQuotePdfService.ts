@@ -2,7 +2,7 @@ import * as Print from "expo-print";
 
 import type { BusinessProfile } from "@/lib/models/businessProfile";
 import type { BrandingSettings } from "@/lib/models/branding";
-import { getQuoteTotals } from "@/lib/utils/quoteUtils";
+import { getQuoteTotalsByCurrency } from "@/lib/utils/quoteUtils";
 import type { FreeQuote } from "@/store/freeQuoteStore";
 
 import {
@@ -24,7 +24,7 @@ export async function generateLocalPremiumQuotePdf(
   branding: BrandingSettings | null,
   _existingPdfUrl?: string | null,
 ): Promise<GeneratedQuotePdf> {
-  const totals = getQuoteTotals(quote.items, quote.depositPercentage);
+  const totals = getQuoteTotalsByCurrency(quote.items, quote.depositPercentage);
   const html = await buildPremiumQuotePdfHtml(
     quote,
     totals,

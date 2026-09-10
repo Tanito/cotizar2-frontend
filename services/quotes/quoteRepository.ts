@@ -16,6 +16,12 @@ export interface QuoteRepository {
 
 const STORAGE_KEY = "@cotizar/quotes";
 
+function isCurrencyTotals(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) return false;
+  const totals = value as Record<string, unknown>;
+  return typeof totals.ARS === "number" && typeof totals.USD === "number";
+}
+
 function isQuote(value: unknown): value is Quote {
   if (typeof value !== "object" || value === null) return false;
 
@@ -26,6 +32,8 @@ function isQuote(value: unknown): value is Quote {
     typeof quote.quoteNumber === "string" &&
     typeof quote.clientName === "string" &&
     typeof quote.total === "number" &&
+    (quote.currencyTotals === undefined ||
+      isCurrencyTotals(quote.currencyTotals)) &&
     typeof quote.createdAt === "string" &&
     (quote.status === "draft" || quote.status === "sent")
   );

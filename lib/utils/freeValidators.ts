@@ -1,3 +1,5 @@
+import type { QuoteCurrency } from "@/lib/utils/quoteUtils";
+
 export type QuoteMetaForm = {
   customerName: string;
   customerPhone: string;
@@ -11,6 +13,7 @@ export type QuoteItemForm = {
   description: string;
   quantity: number;
   unitPrice: number;
+  currency: QuoteCurrency;
 };
 
 export type QuoteMetaErrors = Partial<Record<keyof QuoteMetaForm, string>>;

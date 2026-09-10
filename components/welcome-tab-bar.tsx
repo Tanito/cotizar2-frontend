@@ -1,4 +1,6 @@
-import { StyleSheet, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Link } from "expo-router";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ACTIVE = "#2563EB";
@@ -13,14 +15,14 @@ export function WelcomeTabBar() {
       <View style={styles.spacer} />
       <View style={styles.spacer} />
 
-      {/* <View style={styles.centerTab}>
+      <View style={styles.centerTab}>
         <Link href="/home" asChild>
           <Pressable style={styles.fab}>
             <Ionicons name="diamond-outline" size={26} color="#FFFFFF" />
           </Pressable>
         </Link>
-        <Text style={styles.centerLabel}>Premium</Text>
-      </View> */}
+        <Text style={styles.centerLabel}>Mi panel</Text>
+      </View>
 
       <View style={styles.spacer} />
       <View style={styles.spacer} />

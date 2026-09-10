@@ -1,4 +1,4 @@
-import { Link, type Href } from "expo-router";
+import { Link } from "expo-router";
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
